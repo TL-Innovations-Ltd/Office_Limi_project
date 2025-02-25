@@ -1,22 +1,29 @@
 const transporter = require('../../../utils/gmail_transport');
 const UserDB = require('../models/user_models');
-
+const jwt = require('jsonwebtoken');
 // Generate Random Username Function
 const generateUsername = () => {
     return "user_" + Math.random().toString(36).substring(2, 10);
-  };
+};
 
-//  Store User temprary otp to check
-const  user_OTP = {};
+
 module.exports = {
-     
-    send_otp_service : (req) => { 
-        const {email} = req.body;
-        if(!email){
+
+    send_otp_service: async (req) => {
+        const { email } = req.body;
+       
+        if (!email) {
             throw new Error('Missing email');
         }
+
+        const findEmail = await UserDB.findOne({ email: email });
+        const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
         const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
-        user_OTP[email] = otp;  // save OTP to Temprary otp object
+        if (!findEmail) {
+            await UserDB.create({ email: email, otp: otp, otp_expire_at: otpExpiresAt });
+        } else {
+            await UserDB.updateOne({ email: email }, { otp: otp, otp_expire_at: otpExpiresAt });
+        }
 
         const mailOptions = {
             from: process.env.GMAIL_SECRET_EMIAL,
@@ -32,39 +39,62 @@ module.exports = {
                 console.log("Email sent:", info.response);
             }
         });
-        
-        return 'HOgya';
+
+        return 'OTP Send  Succesfully & Expiry in 15 mint';
     },
 
-    check_otp_service : async(req) => {
-         const {otp} = req.body;
-         if(!otp){
-             throw new Error('Missing  OTP');
-         }
-        // OTP ki key (email) extract karne ke liye object ko iterate karna hoga
-        let findEmail = null;
-        for (let key in user_OTP) {
-            console.log(`key : ${key} and otp ; ${user_OTP}`);
-            if (user_OTP[key] === otp) {
-                findEmail = key;
-                break;
-            }
+    check_otp_service: async (req) => {
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            throw new Error('Missing email or otp');
+        }
+        const user = await UserDB.findOne({ email });;
+        if (!user) {
+            throw new Error('User not found');
         }
 
-        if (!findEmail) {
+        if (user.otp !== otp) {
             throw new Error("Invalid OTP");
         }
-        
-        // Remove OTP from Temprary otp object after successful verification
-        delete user_OTP[findEmail];
+
+        if (new Date() > user.otp_expire_at) {
+            throw new Error("OTP expired");
+        }
 
         // Generate random username
         const username = generateUsername();
 
-        const newUser = new UserDB({ email : findEmail, username : username });
-            await newUser.save();
+        // Update user (clear OTP, set username)
+        const user_data = await UserDB.findOneAndUpdate(
+            { email },
+            { otp: null, otp_expire_at: null, username: username },
+            { new: true } // Yeh updated document return karega
+        );
 
-        return newUser;
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.SECRET_KEY,
+            { expiresIn: "7d" } // Token expires in 7 days
+        );
+
+        return { data: user_data, token: token };
+    },
+
+    update_user_service: async (req) => {
+        const { id } = req.params;
+        const { user_name } = req.body;
+
+        if (!id || !user_name) {
+            throw new Error('Missing user_id or user_name');
+        }
+
+        const user = await UserDB.findByIdAndUpdate({ _id: id }, { username: user_name }, { new: true });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user;
     }
-    
+
 }
