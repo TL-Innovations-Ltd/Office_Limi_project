@@ -11,7 +11,7 @@ app.use(express.json());
 connectDB();
 
 // 🔥 Auto Unlink Script Require Karo
-require('./src/client/node_cron_timer/node_cron_timer');
+// require('./src/client/node_cron_timer/node_cron_timer');
 
 app.use('/client' , user_routes);
 app.use('/client/devices' , device_routes );

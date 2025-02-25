@@ -23,6 +23,17 @@ module.exports = {
               console.log(e);
               res.status(500).send({error_message : e.message});
            }
+     },
+
+     light_control : async(req, res) => {
+           try{
+              const f =  await device_services.light_control_service(req);
+              res.status(200).send({success  : true , data  : f });
+           }
+           catch(e){
+              console.log(e);
+              res.status(500).send({error_message : e.message});
+           }
      }
     
 }
