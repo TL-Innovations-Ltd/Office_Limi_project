@@ -6,6 +6,7 @@ const authClientmiddleware = require('../middleware/user_middleware');
 // Routes
 router.post('/add_device' , device_controller.add_devices);
 router.post('/link_device' , authClientmiddleware  ,  device_controller.link_devices);
-router.patch('/light_control' , authClientmiddleware , device_controller.light_control)
+router.patch('/light_control' , authClientmiddleware , device_controller.light_control);
+router.get('/alldevices' , device_controller.alldevices)
 
 module.exports = router;
