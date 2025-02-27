@@ -20,7 +20,7 @@ module.exports = {
         const { device_id } = req.body;
 
         const user = req.user;
-
+          console.log(user);
         const findDevice = await Device_DB.findOne({ device_id: device_id });
 
         if (!findDevice) {
@@ -28,7 +28,7 @@ module.exports = {
         }
 
         // ✅ Check if device is already linked to the current user
-        if (user.devices.some(device => device.device_id === device_id)) {
+        if (user?.devices?.some(device => device?.device_id === device_id)) {
             throw new Error("Device already linked to this user");
         }
 
@@ -84,26 +84,45 @@ module.exports = {
         //     blinking
         // });
 
-        // mqttClient.publish(MQTT_TOPIC, mqttMessage, { qos: 1, retain: false }, (error) => {
-        //     if (error) {
-        //         console.error("❌ MQTT Publish Error:", error);
-        //     } else {
-        //         console.log("📡 MQTT Message Sent:", mqttMessage);
-        //     }
-        // });
+        mqttClient.publish(MQTT_TOPIC, mqttMessage, { qos: 1, retain: false }, (error) => {
+            if (error) {
+                console.error("❌ MQTT Publish Error:", error);
+            } else {
+                console.log("📡 MQTT Message Sent:", mqttMessage);
+            }
+        });
      
-        // // ✅ Listen for MQTT Response (Success/Failure from IoT Device)
-        // mqttClient.on("message", (topic, message) => {
-        //     if (topic === MQTT_TOPIC) {
-        //         console.log("📩 IoT Device Response:", message.toString());
-        //     }
-        // });
+        // ✅ Listen for MQTT Response (Success/Failure from IoT Device)
+        mqttClient.on("message", (topic, message) => {
+            if (topic === MQTT_TOPIC) {
+                console.log("📩 IoT Device Response:", message.toString());
+            }
+        });
 
         return updatedDevice;
     },
 
     all_devices_service : async(req) => {
         return  await Device_DB.find({});
+    },
+
+    get_linked_devices_service : async(req) => {
+        const user = await User_DB.findById(req.user._id)
+        .populate({
+            path: 'device_details',
+            select: 'device_name -_id' // ✅ Select only necessary fields
+        });
+
+        // ✅ Filter sirf zaroori cheezein
+        const filteredResponse = {
+            username: user.username,
+            devices: user.device_details?.map(device => ({
+            device_name: device.device_name,
+            device_id : device.device_id
+        })) || []
+           };
+
+    return filteredResponse;
     }
 
 }

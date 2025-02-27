@@ -45,6 +45,17 @@ module.exports = {
             console.log(e);
             res.status(500).send({error_message : e.message});
        }
-     }     
+     },
+     
+     get_link_devices : async(req, res) => {
+        try{
+            const link_devices = await device_services.get_linked_devices_service(req);
+            res.status(200).send({success  : true , devices : link_devices});
+        }
+        catch(e){
+             console.log(e);
+             res.status(500).send({error_message : e.message});
+        }
+     }
     
 }
