@@ -24,6 +24,18 @@ module.exports = {
           }
     },
 
+    installer_user : async(req, res) => {
+          try{
+              const installer_user = await user_service.installer_user_service();
+              res.status(200).json(
+                {success  : true , message : 'Installer User created' , data : installer_user});
+          }
+          catch(e){
+             console.log(e);
+             res.status(500).json({ error_message : e.message});
+          }
+    },
+
     update_name : async(req , res) => {
          try{
             const update_user = await user_service.update_user_service(req);

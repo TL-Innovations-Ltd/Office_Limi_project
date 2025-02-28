@@ -46,6 +46,17 @@ module.exports = {
             res.status(500).send({error_message : e.message});
        }
      },
+
+     alldevices_user : async(req ,res) => {
+         try{
+             const all_devices = await device_services.all_devices_user_service(req);
+             res.status(200).send({success  : true , devices : all_devices});
+         }
+         catch(e){
+              console.log(e);
+              res.status(500).send({error_message : e.message});
+         }
+     },
      
      get_link_devices : async(req, res) => {
         try{

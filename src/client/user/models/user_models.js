@@ -8,6 +8,7 @@ const Use_Schema = new  mongoose.Schema({
 
      email :  {
          type  : String,
+         unique : true,
          require : true,
      },
      
@@ -19,10 +20,15 @@ const Use_Schema = new  mongoose.Schema({
        type  : Date
      },
 
+     installer_expire_at: {  // 🔥 Installer role ka expiry
+        type: Date,
+        default: null
+    },
+
      roles :  {
          type : String,
          enum : ['installer', 'user'],
-         default : 'installer',
+         default : 'user',
      },
      devices: [
         { 

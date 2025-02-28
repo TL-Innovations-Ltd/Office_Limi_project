@@ -6,12 +6,11 @@ const generateUsername = () => {
     return "user_" + Math.random().toString(36).substring(2, 10);
 };
 
-
 module.exports = {
 
     send_otp_service: async (req) => {
         const { email } = req.body;
-       
+        
         if (!email) {
             throw new Error('Missing email');
         }
@@ -28,7 +27,7 @@ module.exports = {
         const mailOptions = {
             from: process.env.GMAIL_SECRET_EMIAL,
             to: email,
-            subject: "OTP",
+            subject: "Limi App OTP",
             text: `This is your OTP ${otp}`
         };
 
@@ -75,10 +74,36 @@ module.exports = {
         const token = jwt.sign(
             { id: user._id },
             process.env.SECRET_KEY,
-            { expiresIn: "7d" } // Token expires in 7 days
+            { expiresIn: "1h" } // Token expires in 7 days
         );
 
         return { data: user_data, token: token };
+    },
+
+    installer_user_service : async() =>{
+           
+        const guestUsername = generateUsername();
+          // 🔥 Installer ka expiry 24 hours ke baad set karo
+        const installerExpireTime = new Date();
+        installerExpireTime.setHours(installerExpireTime.getHours() + 24);
+
+          const newInstaller = new UserDB({
+            username: guestUsername,
+            email : `${guestUsername}@gmail.com`,
+            roles: "installer",
+            installer_expire_at: installerExpireTime
+        });
+
+        await newInstaller.save();
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.SECRET_KEY,
+            { expiresIn: "1h" } // Token expires in 7 days
+        );
+
+        return { data: newInstaller, token: token };
     },
 
     update_user_service: async (req) => {

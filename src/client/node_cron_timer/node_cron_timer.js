@@ -1,20 +1,17 @@
 const cron = require('node-cron');
 const User_DB = require('../user/models/user_models'); 
 
-// 🔥 Run every 1 minutes
-cron.schedule('*/1 * * * *', async () => {
-    console.log("Running device unlink cleanup for installers Roles...");
-    const users = await User_DB.find({ roles: "installer" });
-    for (let user of users) {
-        const now = new Date();
+// 🔥 Run every 24 hours (Midnight)
+cron.schedule('0 0 * * *', async () => {
+    console.log("Running cleanup for installer roles...");
 
-        // 🔥 Sirf installer users ke purane devices remove karo
-        user.devices = user.devices.filter(device => {
-            const addedTime = new Date(device.addedAt); 
-            return (now - addedTime) < (2 * 60 * 1000); // 2 minutes ke andar wale devices hi rakho
-        });
+    const now = new Date();
 
-        await user.save();
-    }
-    console.log("Cleanup completed.");
+    // 🔥 Purane installer accounts delete karna jo expire ho chuke hain
+    await User_DB.deleteMany({
+        roles: "installer",
+        installer_expire_at: { $lt: now } // Jo expire ho chuka hai usko delete karo
+    });
+
+    console.log("Expired installer accounts deleted.");
 });

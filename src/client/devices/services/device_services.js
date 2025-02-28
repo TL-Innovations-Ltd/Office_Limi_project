@@ -84,20 +84,20 @@ module.exports = {
         //     blinking
         // });
 
-        mqttClient.publish(MQTT_TOPIC, mqttMessage, { qos: 1, retain: false }, (error) => {
-            if (error) {
-                console.error("❌ MQTT Publish Error:", error);
-            } else {
-                console.log("📡 MQTT Message Sent:", mqttMessage);
-            }
-        });
+        // mqttClient.publish(MQTT_TOPIC, mqttMessage, { qos: 1, retain: false }, (error) => {
+        //     if (error) {
+        //         console.error("❌ MQTT Publish Error:", error);
+        //     } else {
+        //         console.log("📡 MQTT Message Sent:", mqttMessage);
+        //     }
+        // });
      
-        // ✅ Listen for MQTT Response (Success/Failure from IoT Device)
-        mqttClient.on("message", (topic, message) => {
-            if (topic === MQTT_TOPIC) {
-                console.log("📩 IoT Device Response:", message.toString());
-            }
-        });
+        // // ✅ Listen for MQTT Response (Success/Failure from IoT Device)
+        // mqttClient.on("message", (topic, message) => {
+        //     if (topic === MQTT_TOPIC) {
+        //         console.log("📩 IoT Device Response:", message.toString());
+        //     }
+        // });
 
         return updatedDevice;
     },
@@ -122,7 +122,26 @@ module.exports = {
         })) || []
            };
 
-    return filteredResponse;
+        return filteredResponse;
+    },
+
+    all_devices_user_service : async(req) => {
+         // 🟢 Token se user ID le lo (Assume req.user.id me aa raha hai)
+        const userId = req.user.id; 
+        
+        // 🟢 User ka record fetch karo (Devices wali field include karo)
+        const user = await User_DB?.findById(userId)?.select("devices");
+
+        // 🟢 Sare available devices fetch karo
+        const allDevices = await Device_DB?.find({});
+        
+        // 🟢 User ke devices ki list bana lo (Sirf device_id extract karo)
+        const userDeviceIds = user?.devices?.map(device => device?.device_id?.toString());
+
+        // 🔥 Filter out only those devices jo user ke pass nahi hain
+        const filteredDevices = allDevices?.filter(device => !userDeviceIds?.includes(device?.device_id?.toString()));
+
+        return filteredDevices; 
     }
 
 }
