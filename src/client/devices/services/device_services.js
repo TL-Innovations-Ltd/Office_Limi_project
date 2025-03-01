@@ -118,7 +118,8 @@ module.exports = {
             username: user.username,
             devices: user.device_details?.map(device => ({
             device_name: device.device_name,
-            device_id : device.device_id
+            device_id : device.device_id,
+            device_status : device.status
         })) || []
            };
 

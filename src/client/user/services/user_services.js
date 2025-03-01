@@ -109,17 +109,13 @@ module.exports = {
     update_user_service: async (req) => {
         const { id } = req.params;
         const { user_name } = req.body;
-
         if (!id || !user_name) {
             throw new Error('Missing user_id or user_name');
         }
-
         const user = await UserDB.findByIdAndUpdate({ _id: id }, { username: user_name }, { new: true });
-
         if (!user) {
             throw new Error('User not found');
         }
         return user;
     }
-
 }
