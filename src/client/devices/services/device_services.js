@@ -110,7 +110,7 @@ module.exports = {
         const user = await User_DB.findById(req.user._id)
         .populate({
             path: 'device_details',
-            select: 'device_name -_id' // ✅ Select only necessary fields
+            select: 'device_name status -_id' // ✅ Select only necessary fields
         });
 
         // ✅ Filter sirf zaroori cheezein

@@ -98,7 +98,7 @@ module.exports = {
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: user._id },
+            { id: newInstaller._id },
             process.env.SECRET_KEY,
             { expiresIn: "1h" } // Token expires in 7 days
         );
