@@ -24,12 +24,63 @@ module.exports = {
             await UserDB.updateOne({ email: email }, { otp: otp, otp_expire_at: otpExpiresAt });
         }
 
+        // **Generate Deep Link for Swift App**
+        const appDeepLink = `http:/limiapp/verify-otp?email=${encodeURIComponent(email)}&otp=${otp}`
+
         const mailOptions = {
-            from: process.env.GMAIL_SECRET_EMIAL,
-            to: email,
-            subject: "Limi App OTP",
-            text: `This is your OTP ${otp}`
-        };
+       from: process.env.GMAIL_SECRET_EMIAL,
+       to: email,
+       subject: "Limi App OTP",
+       html: `
+       <div style="
+        font-family: Arial, sans-serif;
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+       ">
+        <h2 style="color: #333;">Limi App OTP Verification</h2>
+        <p style="font-size: 16px;">This is your OTP:</p>
+        <p style="
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        ">${otp}</p>
+        <p style="font-size: 14px; color: #666;">This OTP will expire in 15 minutes.</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 16px;">Or click the button below to verify:</p>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+            <tr>
+                <td align="center" bgcolor="#007bff" style="
+                    border-radius: 5px;
+                    padding: 12px 24px;
+                    display: block;
+                ">
+                    <a href="limiapp://verify-otp?email=${encodeURIComponent(email)}&otp=${otp}"
+                        style="
+                            font-size: 16px;
+                            color: #ffffff;
+                            text-decoration: none;
+                            font-weight: bold;
+                            display: block;
+                        ">
+                        Verify OTP
+                    </a>
+                </td>
+            </tr>
+        </table>
+
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            If you didn't request this, please ignore this email.
+        </p>
+       </div>
+       `
+        }
 
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
@@ -102,7 +153,7 @@ module.exports = {
             process.env.SECRET_KEY,
             { expiresIn: "1h" } // Token expires in 7 days
         );
-
+        
         return { data: newInstaller, token: token };
     },
 

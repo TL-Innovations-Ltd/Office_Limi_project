@@ -67,6 +67,28 @@ module.exports = {
              console.log(e);
              res.status(500).send({error_message : e.message});
         }
+     },
+
+     add_bluetooth_device : async(req ,res) => {
+        try{
+            const bluetooth_device = await device_services.add_bluetooth_device_service(req);
+            res.status(200).send({success  : true , device : bluetooth_device});
+        }
+        catch(e){
+             console.log(e);
+             res.status(500).send({error_message : e.message});
+        }
+     },
+
+     get_bluetooth_device : async(req ,res) => {
+       try{
+            const bluetooth_device = await device_services.get_bluetooth_device_service(req);
+            return bluetooth_device;
+       }
+       catch(e){
+            console.log(e);
+            throw new Error('Error in getting Bluetooth device');
+       }
      }
     
 }

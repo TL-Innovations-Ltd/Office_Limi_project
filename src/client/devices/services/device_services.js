@@ -1,4 +1,5 @@
 const Device_DB = require('../models/device_model');
+const Bluetooth_DB = require('../models/bluetooth_devices');
 const User_DB = require('../../user/models/user_models');
 const mongoose = require('mongoose');
 const mqttClient = require('../../hive_MQTT_connection/mqtt_conenection');
@@ -127,7 +128,7 @@ module.exports = {
     },
 
     all_devices_user_service : async(req) => {
-         // 🟢 Token se user ID le lo (Assume req.user.id me aa raha hai)
+        // 🟢 Token se user ID le lo (Assume req.user.id me aa raha hai)
         const userId = req.user.id; 
         
         // 🟢 User ka record fetch karo (Devices wali field include karo)
@@ -143,6 +144,48 @@ module.exports = {
         const filteredDevices = allDevices?.filter(device => !userDeviceIds?.includes(device?.device_id?.toString()));
 
         return filteredDevices; 
+    },
+
+    add_bluetooth_device_service : async(req) => {
+    const { device_id, device_name} = req.body;
+    const user = req.user; // 🔥 Token middleware se user mil gaya
+
+    // 🔹 Step 1: Check if Bluetooth Device already exists
+    let device = await Bluetooth_DB.findOne({ device_id: device_id });
+
+    if (!device) {
+      // 🔹 Step 2: If device does not exist, create a new Bluetooth device entry
+      device = new Bluetooth_DB({
+        deviceName: device_name,
+        device_id: device_id,
+      });
+
+      await device.save(); // 🔥 Save new device in database
+    }
+
+    // 🔹 Step 3: Check if the device is already linked with the user
+    const isAlreadyLinked = user.devices.some((d) => d.device_id === device_id);
+    if (isAlreadyLinked) {
+      throw new Error("Device already linked to user");
+    }
+
+    // 🔹 Step 4: Add device to user's Bluetooth devices array
+    user.devices.push({ device_id });
+    await user.save(); // 🔥 Save updated user
+
+    return {success : true,data  : user};
+    },
+
+    get_bluetooth_device_service : async(req) => {
+        const user = await User_DB.findById(req.user.id)
+        .populate("device_details") // 🔥 Virtual populate ka use kar raha hai
+        .select("-otp -otp_expire_at"); // 🔥 Extra fields hide kar raha hai
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
     }
 
 }

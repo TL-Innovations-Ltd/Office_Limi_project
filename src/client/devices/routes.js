@@ -10,5 +10,7 @@ router.get('/get_link_devices' , authClientmiddleware , device_controller.get_li
 router.patch('/light_control' , authClientmiddleware , device_controller.light_control);
 router.get('/alldevices' ,  device_controller.alldevices);
 router.get('/alldevices_user' , authClientmiddleware ,  device_controller.alldevices_user);
+router.post('/add_bluetooth_device', authClientmiddleware , device_controller.add_bluetooth_device);
+router.get('/get_bluetooth_device', authClientmiddleware , device_controller.get_bluetooth_device);
 
 module.exports = router;
