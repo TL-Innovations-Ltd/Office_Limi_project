@@ -25,5 +25,5 @@ connectDB();
 app.use('/client' , user_routes);
 app.use('/client/devices' , device_routes );
 
-// app.listen( process.env.PORT ,() => console.log('🌐 Server is running on port 3000'));
-module.exports = app;
+app.listen( process.env.PORT ,() => console.log('🌐 Server is running on port 3000'));
+// module.exports = app;
