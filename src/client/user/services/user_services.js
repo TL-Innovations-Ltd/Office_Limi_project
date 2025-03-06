@@ -89,7 +89,7 @@ module.exports = {
             if (err) {
                 console.error("Error sending email:", err);
             } else {
-                console.log("Email sent:", info);
+                console.log("Email sent:", info.response);
             }
         });
       
