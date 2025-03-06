@@ -22,8 +22,6 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false // ✅ Ignore self-signed cert errors
     },
-    connectionTimeout: 10000, // Increase connection timeout
-    socketTimeout: 10000 // Increase socket timeout
 });
 
 // Directly Exporting Transporter
