@@ -84,14 +84,20 @@ module.exports = {
        </div>
        `
         }
-
-        transporter.sendMail(mailOptions, (err, info) => {
-            if (err) {
-                console.error("Error sending email:", err);
-            } else {
-                console.log("Email sent:", info.response);
-            }
-        });
+        
+    
+            let  s =  await transporter.sendMail(mailOptions);
+            console.log(s);
+             if(!s){
+                 throw new Error("Failed to send OTP email");
+             }
+        // transporter.sendMail(mailOptions, (err, info) => {
+        //     if (err) {
+        //         console.error("Error sending email:", err);
+        //     } else {
+        //         console.log("Email sent:", info.response);
+        //     }
+        // });
       
     // const response = await resend.emails.send({
     //     from: 'Limi@onresend.com',  // Free plan par yehi use hoga
