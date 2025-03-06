@@ -86,11 +86,11 @@ module.exports = {
         }
         
     
-            let  s =  await transporter.sendMail(mailOptions);
-            console.log(s);
-             if(!s){
-                 throw new Error("Failed to send OTP email");
-             }
+            // let  s =  await transporter.sendMail(mailOptions);
+            // console.log(s);
+            //  if(!s){
+            //      throw new Error("Failed to send OTP email");
+            //  }
         // transporter.sendMail(mailOptions, (err, info) => {
         //     if (err) {
         //         console.error("Error sending email:", err);
@@ -99,13 +99,65 @@ module.exports = {
         //     }
         // });
       
-    // const response = await resend.emails.send({
-    //     from: 'Limi@onresend.com',  // Free plan par yehi use hoga
-    //     to: email,
-    //     subject: 'LIMI OTP',
-    //     html: `<p>${otp}</p>`
-    // });
-    // console.log('✅ Email Sent:', response);
+    const response = await resend.emails.send({
+        from: 'Limi  <onboarding@resend.dev>',  // Free plan par yehi use hoga
+        to: [email],
+        subject: 'Limi App  OTP',
+        html: `
+         <div style="
+        font-family: Arial, sans-serif;
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+       ">
+        <h2 style="color: #333;">Limi App OTP Verification</h2>
+        <p style="font-size: 16px;">This is your OTP:</p>
+        <p style="
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        ">${otp}</p>
+        <p style="font-size: 14px; color: #666;">This OTP will expire in 15 minutes.</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 16px;">Or click the button below to verify:</p>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+            <tr>
+                <td align="center" bgcolor="#007bff" style="
+                    border-radius: 5px;
+                    padding: 12px 24px;
+                    display: block;
+                ">
+                    <a href="limiapp://verify-otp?email=${encodeURIComponent(email)}&otp=${otp}"
+                        style="
+                            font-size: 16px;
+                            color: #ffffff;
+                            text-decoration: none;
+                            font-weight: bold;
+                            display: block;
+                        ">
+                        Verify OTP
+                    </a>
+                </td>
+            </tr>
+        </table>
+
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            If you didn't request this, please ignore this email.
+        </p>
+       </div>
+        `
+    });
+
+    if(!response){
+         throw new Error("Failed to send OTP email");
+    }
+    console.log('✅ Email Sent:', response);
         return 'OTP Send  Succesfully & Expiry in 15 mint';
     },
 
