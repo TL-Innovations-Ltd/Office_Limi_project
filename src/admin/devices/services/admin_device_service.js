@@ -92,7 +92,7 @@ module.exports = {
         if (!channel) {
             throw new Error("Channel not found");
         }
-
+   
         // Check if channel already has a PWM Light
         if (channel.pwmLight) {
             throw new Error("Channel already has a PWM Light registered");
