@@ -36,6 +36,16 @@ module.exports = {
           }
     },
 
+    add_family_member : async(req, res) => {
+        try {
+            const familyMember = await user_service.add_family_member_service(req);
+            res.status(200).json({success  : true , message : 'Family member added' , data : familyMember});
+        } catch (e) {
+            console.log(e);
+            res.status(500).json({success  : false , error_message : e.message});
+        }
+    },
+
     update_name : async(req , res) => {
          try{
             const update_user = await user_service.update_user_service(req);

@@ -1,16 +1,16 @@
+
 const express = require('express');
 const router = express.Router();
-const device_controller = require('./controllers/device_controller');
+const client_device_controller = require('./controllers/client_device_controllers');
 const authClientmiddleware = require('../middleware/user_middleware');
 
-// Routes
-router.post('/add_device' , device_controller.add_devices);
-router.post('/link_device' , authClientmiddleware  ,  device_controller.link_devices);
-router.get('/get_link_devices' , authClientmiddleware , device_controller.get_link_devices);
-router.patch('/light_control' , authClientmiddleware , device_controller.light_control);
-router.get('/alldevices' ,  device_controller.alldevices);
-router.get('/alldevices_user' , authClientmiddleware ,  device_controller.alldevices_user);
-router.post('/add_bluetooth_device', authClientmiddleware , device_controller.add_bluetooth_device);
-router.get('/get_bluetooth_device', authClientmiddleware , device_controller.get_bluetooth_device);
+router.post('/link_user_master_controller' , authClientmiddleware ,  client_device_controller.link_user_master_controller);  // tested
+router.get('/get_user_master_controller' , authClientmiddleware ,  client_device_controller.get_user_master_controller);  // tested
+router.patch('/pwm_light_control' , authClientmiddleware ,  client_device_controller.pwm_light_control); // tested
+router.patch('/rgb_light_control' ,  authClientmiddleware , client_device_controller.rgb_light_control);    // tested
+router.patch('/mini_controller_light_control' ,  authClientmiddleware , client_device_controller.mini_controller_light_control);
+router.get('/get_all_lights' ,  authClientmiddleware ,  client_device_controller.get_all_devices);  // tested
+router.get('/get_user_channels' ,  authClientmiddleware ,  client_device_controller.get_user_channels);  // tested
+router.get('/get_user_channels_mode_lights' ,  authClientmiddleware ,   client_device_controller.get_user_channels_mode_lights)  //tested
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const transporter = require('../../../utils/gmail_transport');
 const UserDB = require('../models/user_models');
 const jwt = require('jsonwebtoken');
+
 // const { Resend } = require('resend');
 
 // const resend = new Resend("re_8Qk5APrR_PCFiD93vLzBXJxhzs8oPsQbC");
@@ -32,8 +33,6 @@ module.exports = {
         }
 
         // **Generate Deep Link for Swift App**
-    
-
         const mailOptions = {
        from: process.env.BREVO_SECRET_EMAIL,
        to: email,
@@ -93,69 +92,6 @@ module.exports = {
             let  s =  await transporter.sendMail(mailOptions);
             console.log(s.response);
 
-        // transporter.sendMail(mailOptions, (err, info) => {
-        //     if (err) {
-        //         console.error("Error sending email:", err);
-        //     } else {
-        //         console.log("Email sent:", info.response);
-        //     }
-        // });
-      
-    // const response = await resend.emails.send({
-    //     from: 'Limi  <onboarding@resend.dev>',  // Free plan par yehi use hoga
-    //     to: [email],
-    //     subject: 'Limi App  OTP',
-    //     html: `
-    //      <div style="
-    //     font-family: Arial, sans-serif;
-    //     max-width: 500px;
-    //     margin: auto;
-    //     padding: 20px;
-    //     border: 1px solid #ddd;
-    //     border-radius: 10px;
-    //     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-    //     text-align: center;
-    //    ">
-    //     <h2 style="color: #333;">Limi App OTP Verification</h2>
-    //     <p style="font-size: 16px;">This is your OTP:</p>
-    //     <p style="
-    //         font-size: 24px;
-    //         font-weight: bold;
-    //         color: #007bff;
-    //         margin: 10px 0;
-    //     ">${otp}</p>
-    //     <p style="font-size: 14px; color: #666;">This OTP will expire in 15 minutes.</p>
-    //     <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-    //     <p style="font-size: 16px;">Or click the button below to verify:</p>
-
-    //     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
-    //         <tr>
-    //             <td align="center" bgcolor="#007bff" style="
-    //                 border-radius: 5px;
-    //                 padding: 12px 24px;
-    //                 display: block;
-    //             ">
-    //                 <a href="limiapp://verify-otp?email=${encodeURIComponent(email)}&otp=${otp}"
-    //                     style="
-    //                         font-size: 16px;
-    //                         color: #ffffff;
-    //                         text-decoration: none;
-    //                         font-weight: bold;
-    //                         display: block;
-    //                     ">
-    //                     Verify OTP
-    //                 </a>
-    //             </td>
-    //         </tr>
-    //     </table>
-
-    //     <p style="margin-top: 20px; font-size: 12px; color: #999;">
-    //         If you didn't request this, please ignore this email.
-    //     </p>
-    //    </div>
-    //     `
-    // });
-   
         return 'OTP Send  Succesfully & Expiry in 15 mint';
     },
 
@@ -176,7 +112,7 @@ module.exports = {
         if (new Date() > user.otp_expire_at) {
             throw new Error("OTP expired");
         }
-
+         
         // Generate random username
         const username = generateUsername();
 
@@ -221,6 +157,35 @@ module.exports = {
         );
         
         return { data: newInstaller, token: token };
+    },
+
+    add_family_member_service : async(req) => {
+        const parent = req.user;
+        const { email } = req.body;
+        
+        if (!email) {
+            throw new Error('Missing email');
+        }
+        
+        const user = await UserDB.findOne({ email });
+        if (user) {
+            throw new Error('Email already exist');
+        }
+        
+        const username = generateUsername();
+        
+        const newFamilyMember = new UserDB({
+            username: username,
+            email: email ,
+            roles : 'member'
+        });
+        
+        await newFamilyMember.save();
+
+        parent.members.push(newFamilyMember._id);
+        await parent.save();
+        
+        return newFamilyMember;
     },
 
     update_user_service: async (req) => {
