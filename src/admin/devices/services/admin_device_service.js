@@ -44,37 +44,39 @@ module.exports = {
             firmwareVersion,
             hardwareVersion,
             deviceName,
-            channels: [] // Initialize empty channels array
+            // channels: [] // Initialize empty channels array
         });
         await hub.save();
 
+        return hub;
+
         // Create channels based on hubType
-        const channelPromises = [];
-        for (let i = 1; i <= hubType; i++) {
-            const channel = new Channel_DB({
-                hubId: hub._id,
-                channelNumber: `channel${i}`,
-            });
+        // const channelPromises = [];
+        // for (let i = 1; i <= hubType; i++) {
+        //     const channel = new Channel_DB({
+        //         hubId: hub._id,
+        //         channelNumber: `channel${i}`,
+        //     });
 
-            // Save the channel
-            await channel.save();
+        //     // Save the channel
+        //     await channel.save();
 
-            // Add channel to hub's channels array
-            hub.channels.push(channel._id);
+        //     // Add channel to hub's channels array
+        //     hub.channels.push(channel._id);
 
-            channelPromises.push(channel);
-        }
+        //     channelPromises.push(channel);
+        // }
 
         // Save the updated hub with channel references
-        await hub.save();
+        // await hub.save();
 
         // // Update MasterController to include this Hub
         // await MasterController_DB.findByIdAndUpdate(masterControllerId, { $push: { hubs: hub._id } });
 
-        return {
-            hub,
-            channels: channelPromises
-        };
+        // return {
+        //     hub,
+        //     channels: channelPromises
+        // };
     },
 
     add_pwm_controller_device_service: async (req) => {
@@ -161,44 +163,47 @@ module.exports = {
     },
 
     add_mini_controller_device_service: async (req) => {
-        const { channelId, deviceName } = req.body;
+        // const { channelId, deviceName } = req.body;
+        const { deviceName } = req.body;
 
-        if (!channelId) {
-            throw new Error("Missing Channel ID");
-        }
+        // if (!channelId) {
+        //     throw new Error("Missing Channel ID");
+        // }
 
         if (!deviceName) {
             throw new Error("Missing Mini Controller name");
         }
 
         // Find the channel
-        const channel = await Channel_DB.findById(channelId);
-        if (!channel) {
-            throw new Error("Channel not found");
-        }
-
+        // const channel = await Channel_DB.findById(channelId);
+        // if (!channel) {
+        //     throw new Error("Channel not found");
+        // }
+     
         // Check if channel already has a Mini Controller
-        if (channel.miniController) {
-            throw new Error("Channel already has a Mini Controller registered");
-        }
+        // if (channel.miniController) {
+        //     throw new Error("Channel already has a Mini Controller registered");
+        // }
 
         // Create Mini Controller
         const miniController = new MiniController_DB({
-            channelId: channel._id,
+            // channelId: channel._id,
             deviceName
         });
 
         await miniController.save();
 
+        return miniController;
+
         // Update channel with Mini Controller reference
-        channel.miniController = miniController._id;
+        // channel.miniController = miniController._id;
 
-        await channel.save();
+        // await channel.save();
 
-        return {
-            channel,
-            miniController
-        };
+        // return {
+        //     channel,
+        //     miniController
+        // };
     },
 
     add_channel_mini_controller_pwm_device_service: async (req, res) => {
@@ -223,7 +228,6 @@ module.exports = {
         if (miniController.rgbOutputs.length >= 2) {
             throw new Error("Mini Controller already has maximum RGB outputs (2)");
         }
-
 
         const pwmLights = [];
 

@@ -4,7 +4,7 @@ const router = express.Router();
 const client_device_controller = require('./controllers/client_device_controllers');
 const authClientmiddleware = require('../middleware/user_middleware');
 
-router.post('/link_user_master_controller' , authClientmiddleware ,  client_device_controller.link_user_master_controller);  // tested
+router.post('/link_user_master_controller' , authClientmiddleware ,  client_device_controller.link_user_master_controller);  
 router.get('/get_user_master_controller' , authClientmiddleware ,  client_device_controller.get_user_master_controller);  // tested
 router.patch('/pwm_light_control' , authClientmiddleware ,  client_device_controller.pwm_light_control); // tested
 router.patch('/rgb_light_control' ,  authClientmiddleware , client_device_controller.rgb_light_control);    // tested

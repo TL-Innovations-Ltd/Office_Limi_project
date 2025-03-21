@@ -30,7 +30,7 @@ module.exports = {
         // users.masterControllers.push(masterControllerId);
         // await users.save();
 
-        const { hubId } = req.body;
+        const { hubId , hubType ,  macAddress , firmwareVersion , hardwareVersion , deviceName , connectionStatus , status } = req.body;
         const users = req.user;
 
         if (!hubId) {
@@ -40,7 +40,14 @@ module.exports = {
         // Check if the hub exists
         const hub = await Hub_DB.findById(hubId);
         if (!hub) {
-            throw new Error("Hub not found");
+             // Create a new hub with the provided hubData
+        hub = await Hub_DB.create({
+            hubType: hubType,
+            macAddress: macAddress,
+            firmwareVersion: firmwareVersion,
+            hardwareVersion: hardwareVersion,
+            deviceName: deviceName
+        });
         }
 
         if (users.hubs && users.hubs.includes(hubId)) {
@@ -136,19 +143,21 @@ module.exports = {
 
     // Control Mini Controller's PWM and RGB outputs
     mini_controller_output_control_service: async (req) => {
-        const { mini_controller_id, output_type, output_id, status, brightness, color, length } = req.body;
+        // const { mini_controller_id, output_type, output_id, status, brightness, color, length } = req.body;
+        
+        const { mini_controller_id, deviceName} = req.body;
 
         if (!mini_controller_id) {
             throw new Error("Missing Mini Controller ID");
         }
 
-        if (!output_type || !['PWM', 'RGB'].includes(output_type)) {
-            throw new Error("Invalid or missing output type. Must be 'PWM' or 'RGB'");
-        }
+        // if (!output_type || !['PWM', 'RGB'].includes(output_type)) {
+        //     throw new Error("Invalid or missing output type. Must be 'PWM' or 'RGB'");
+        // }
 
-        if (!output_id) {
-            throw new Error("Missing output ID");
-        }
+        // if (!output_id) {
+        //     throw new Error("Missing output ID");
+        // }
 
         // const users = req.user;
         // if (!users || !users.masterControllers || users.masterControllers.length === 0) {
@@ -156,9 +165,9 @@ module.exports = {
         // }
 
         const users = req.user;
-        if (!users || !users.hubs || users.hubs.length === 0) {
-            throw new Error("User has no linked hubs");
-        }
+        // if (!users || !users.hubs || users.hubs.length === 0) {
+        //     throw new Error("User has no linked hubs");
+        // }
 
         // Find the Mini Controller
         const miniController = await Mini_Controller_DB.findById(mini_controller_id);
@@ -167,16 +176,16 @@ module.exports = {
         }
 
         // Find the channel to verify user access
-        const channel = await Channel_DB.findById(miniController.channelId);
-        if (!channel) {
-            throw new Error("Channel not found");
-        }
+        // const channel = await Channel_DB.findById(miniController.channelId);
+        // if (!channel) {
+        //     throw new Error("Channel not found");
+        // }
 
         // Find the hub to get the master controller ID
-        const hub = await Hub_DB.findById(channel.hubId);
-        if (!hub) {
-            throw new Error("Hub not found");
-        }
+        // const hub = await Hub_DB.findById(channel.hubId);
+        // if (!hub) {
+        //     throw new Error("Hub not found");
+        // }
 
         // // Check if user has access to this device's master controller
         // if (!users.masterControllers.includes(hub.masterControllerId.toString())) {
@@ -184,69 +193,69 @@ module.exports = {
         // }
 
         // Check if user has access to this device's master controller
-        if (!users.hubs.includes(hub._id.toString())) {
-            throw new Error("User does not have access to this device");
-        }
+        // if (!users.hubs.includes(hub._id.toString())) {
+        //     throw new Error("User does not have access to this device");
+        // }
 
         // Control the appropriate output based on type
-        let updatedOutput;
+        // let updatedOutput;
 
-        if (output_type === 'PWM') {
-            // Verify the output belongs to this mini controller
-            if (!miniController.pwmOutputs.includes(output_id)) {
-                throw new Error("This PWM output does not belong to the specified Mini Controller");
-            }
+        // if (output_type === 'PWM') {
+        //     // Verify the output belongs to this mini controller
+        //     if (!miniController.pwmOutputs.includes(output_id)) {
+        //         throw new Error("This PWM output does not belong to the specified Mini Controller");
+        //     }
 
-            // Find and update the PWM light
-            const pwmLight = await PWM_DB.findById(output_id);
-            if (!pwmLight) {
-                throw new Error("PWM output not found");
-            }
+        //     // Find and update the PWM light
+        //     const pwmLight = await PWM_DB.findById(output_id);
+        //     if (!pwmLight) {
+        //         throw new Error("PWM output not found");
+        //     }
 
-            // Update properties if provided
-            if (status !== undefined) {
-                pwmLight.status = status;
-            }
+        //     // Update properties if provided
+        //     if (status !== undefined) {
+        //         pwmLight.status = status;
+        //     }
 
-            if (brightness !== undefined) {
-                pwmLight.brightness = brightness;
-            }
+        //     if (brightness !== undefined) {
+        //         pwmLight.brightness = brightness;
+        //     }
 
-            if (color !== undefined) {
-                pwmLight.color = color;
-            }
+        //     if (color !== undefined) {
+        //         pwmLight.color = color;
+        //     }
 
-            await pwmLight.save();
-            updatedOutput = pwmLight;
-        }
-        else if (output_type === 'RGB') {
-            // Verify the output belongs to this mini controller
-            if (!miniController.rgbOutputs.includes(output_id)) {
-                throw new Error("This RGB output does not belong to the specified Mini Controller");
-            }
+        //     await pwmLight.save();
+        //     updatedOutput = pwmLight;
+        // }
+        // else if (output_type === 'RGB') {
+        //     // Verify the output belongs to this mini controller
+        //     if (!miniController.rgbOutputs.includes(output_id)) {
+        //         throw new Error("This RGB output does not belong to the specified Mini Controller");
+        //     }
 
-            // Find and update the RGB light
-            const rgbLight = await RGB_DB.findById(output_id);
-            if (!rgbLight) {
-                throw new Error("RGB output not found");
-            }
+        //     // Find and update the RGB light
+        //     const rgbLight = await RGB_DB.findById(output_id);
+        //     if (!rgbLight) {
+        //         throw new Error("RGB output not found");
+        //     }
 
-            // Update properties if provided
-            if (status !== undefined) {
-                rgbLight.status = status;
-            }
+        //     // Update properties if provided
+        //     if (status !== undefined) {
+        //         rgbLight.status = status;
+        //     }
 
-            if (color !== undefined) {
-                rgbLight.color = color;
-            }
+        //     if (color !== undefined) {
+        //         rgbLight.color = color;
+        //     }
 
-            if (length !== undefined) {
-                rgbLight.length = length;
-            }
+        //     if (length !== undefined) {
+        //         rgbLight.length = length;
+        //     }
 
-            await rgbLight.save();
-            updatedOutput = rgbLight;
-        }
+        //     await rgbLight.save();
+        //     updatedOutput = rgbLight;
+        // }
 
         return {
             miniControllerId: miniController._id,
@@ -302,14 +311,14 @@ module.exports = {
         if (!users || !users.hubs || users.hubs.length === 0) {
             throw new Error("User has no linked hubs");
         }
-
+      
         // Get all hubs linked to the user
         const hubs = await Hub_DB.find({
             _id: { $in: users.hubs }
         }).populate({
             path: 'channels'
         });
-
+    
         // Extract all channels with their hierarchy information
         const channels = [];
 
