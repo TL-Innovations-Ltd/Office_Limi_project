@@ -5,7 +5,7 @@ const cors = require('cors');
 const connectDB = require('./src/connection/DB_connection');
 
 const user_routes = require('./src/client/user/routes');
-const admin_device_routes = require('./src/admin/devices/routes');
+// const admin_device_routes = require('./src/admin/devices/routes');
 const device_routes = require('./src/client/devices/routes');
 
 app.use(
@@ -18,11 +18,11 @@ app.use(express.json());
 
 connectDB();
 // for MQTT connection
-require('./src/client/hive_MQTT_connection/mqtt_services');
+// require('./src/client/hive_MQTT_connection/mqtt_services');
 
 
 // 🔥 Auto Unlink Script Require Karo
-// require('./src/client/node_cron_timer/node_cron_timer');
+require('./src/client/node_cron_timer/node_cron_timer');
 
 app.use('/client' , user_routes);
 app.use('/client/devices' , device_routes);

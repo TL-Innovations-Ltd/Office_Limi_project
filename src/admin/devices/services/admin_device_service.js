@@ -1,4 +1,4 @@
-// const MasterController_DB = require('../models/master-controller_device');
+const MasterController_DB = require('../models/master-controller_device');
 const Hub_DB = require('../models/hub-controller_device');
 const Channel_DB = require('../models/channel_controller_device');
 const PWM_DB = require('../models/pwm_controller_device');
@@ -7,15 +7,15 @@ const MiniController_DB = require('../models/mini_controller_device');
 
 module.exports = {
 
-    // add_master_controller_device_service: async (req) => {
-    //     const { name } = req.body;
-    //     if (!name) {
-    //         throw new Error('Missing Master Controller  Device Name');
-    //     }
-    //     const masterController = new MasterController_DB({ name });
-    //     await masterController.save();
-    //     return masterController;
-    // },
+    add_master_controller_device_service: async (req) => {
+        const { name } = req.body;
+        if (!name) {
+            throw new Error('Missing Master Controller  Device Name');
+        }
+        const masterController = new MasterController_DB({ name });
+        await masterController.save();
+        return masterController;
+    },
 
     add_master_controller_hub_device_service: async (req) => {
         // const { masterControllerId, hubType } = req.body;  // this  is  for  master controller  future use
@@ -378,54 +378,54 @@ module.exports = {
         }
 
         return hub;
+    },
+
+
+    get_master_controller_device_service: async (req) => {
+        const { masterControllerId } = req.body;
+
+        if (!masterControllerId) {
+            throw new Error("Missing Master Controller ID");
+        }
+
+        // Find Master Controller and populate all relationships
+        const masterController = await MasterController_DB.findById(masterControllerId)
+            .populate({
+                path: "hubs",
+                populate: {
+                    path: "channels",
+                    populate: [
+                        {
+                            path: "pwmLight",
+                            model: "PWM", // Ensure correct model name
+                        },
+                        {
+                            path: "rgbLight",
+                            model: "RGB", // Ensure correct model name
+                        },
+                        {
+                            path: "miniController",
+                            model: "MiniController",
+                            populate: [
+                                {
+                                    path: "pwmOutputs",
+                                    model: "PWM", // MiniController ke andar PWM lights
+                                },
+                                {
+                                    path: "rgbOutputs",
+                                    model: "RGB", // MiniController ke andar RGB lights
+                                },
+                            ],
+                        },
+                    ],
+                },
+            });
+
+        if (!masterController) {
+            throw new Error("Master Controller not found");
+        }
+
+        return masterController;
     }
-
-
-    // get_master_controller_device_service: async (req) => {
-    //     const { masterControllerId } = req.body;
-
-    //     if (!masterControllerId) {
-    //         throw new Error("Missing Master Controller ID");
-    //     }
-
-    //     // Find Master Controller and populate all relationships
-    //     const masterController = await MasterController_DB.findById(masterControllerId)
-    //         .populate({
-    //             path: "hubs",
-    //             populate: {
-    //                 path: "channels",
-    //                 populate: [
-    //                     {
-    //                         path: "pwmLight",
-    //                         model: "PWM", // Ensure correct model name
-    //                     },
-    //                     {
-    //                         path: "rgbLight",
-    //                         model: "RGB", // Ensure correct model name
-    //                     },
-    //                     {
-    //                         path: "miniController",
-    //                         model: "MiniController",
-    //                         populate: [
-    //                             {
-    //                                 path: "pwmOutputs",
-    //                                 model: "PWM", // MiniController ke andar PWM lights
-    //                             },
-    //                             {
-    //                                 path: "rgbOutputs",
-    //                                 model: "RGB", // MiniController ke andar RGB lights
-    //                             },
-    //                         ],
-    //                     },
-    //                 ],
-    //             },
-    //         });
-
-    //     if (!masterController) {
-    //         throw new Error("Master Controller not found");
-    //     }
-
-    //     return masterController;
-    // }
 
 };
