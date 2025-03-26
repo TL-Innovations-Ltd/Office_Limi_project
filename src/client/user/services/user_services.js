@@ -28,7 +28,7 @@ module.exports = {
         // Check if the user exists and their role
         if (findEmail) {
             if (findEmail.roles === "production") {
-                return findEmail; // Return user data if role is production
+                return 'Production User'; // Return user data if role is production
             }
         }
 
