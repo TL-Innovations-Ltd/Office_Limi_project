@@ -36,6 +36,16 @@ module.exports = {
           }
     },
 
+    add_production_user : async(req , res) => {
+         try {
+            const production_user = await user_service.add_production_user_service(req);
+            res.status(200).json({success  : true  , data : production_user});
+         } catch (e) {
+             console.log(e);
+             res.status(500).json({success  : false , error_message : e.message});
+         }   
+    },
+
     add_family_member : async(req, res) => {
         try {
             const familyMember = await user_service.add_family_member_service(req);

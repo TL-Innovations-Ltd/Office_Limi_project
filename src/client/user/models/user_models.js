@@ -22,8 +22,11 @@ const Use_Schema = new  mongoose.Schema({
      },
      roles :  {
          type : String,
-         enum : ['installer', 'user' , 'member'],
+         enum : ['installer', 'user' , 'member' , 'production'],
          default : 'user',
+     },
+     production_email_status : {  // 🔥 Production role ka expiry
+        type: Boolean
      },
      members : [{
            type : mongoose.Schema.Types.ObjectId,

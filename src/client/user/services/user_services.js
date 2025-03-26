@@ -18,12 +18,20 @@ module.exports = {
 
     send_otp_service: async (req) => {
         const { email } = req.body;
-        
+
         if (!isValidEmail(email) || !email) {
             throw new Error("Invalid email format");
         }
 
         const findEmail = await UserDB.findOne({ email: email });
+
+        // Check if the user exists and their role
+        if (findEmail) {
+            if (findEmail.roles === "production") {
+                return findEmail; // Return user data if role is production
+            }
+        }
+
         const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
         const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
         if (!findEmail) {
@@ -34,10 +42,10 @@ module.exports = {
 
         // **Generate Deep Link for Swift App**
         const mailOptions = {
-       from: process.env.BREVO_SECRET_EMAIL,
-       to: email,
-       subject: "Limi App OTP",
-       html: `
+            from: process.env.BREVO_SECRET_EMAIL,
+            to: email,
+            subject: "Limi App OTP",
+            html: `
        <div style="
         font-family: Arial, sans-serif;
         max-width: 500px;
@@ -87,10 +95,9 @@ module.exports = {
        </div>
        `
         }
-        
-    
-            let  s =  await transporter.sendMail(mailOptions);
-            console.log(s.response);
+
+        let s = await transporter.sendMail(mailOptions);
+        console.log(s.response);
 
         return 'OTP Send  Succesfully & Expiry in 15 mint';
     },
@@ -112,7 +119,7 @@ module.exports = {
         if (new Date() > user.otp_expire_at) {
             throw new Error("OTP expired");
         }
-         
+
         // Generate random username
         const username = generateUsername();
 
@@ -133,16 +140,16 @@ module.exports = {
         return { data: user_data, token: token };
     },
 
-    installer_user_service : async() =>{
-           
+    installer_user_service: async () => {
+
         const guestUsername = generateUsername();
-          // 🔥 Installer ka expiry 24 hours ke baad set karo
+        // 🔥 Installer ka expiry 24 hours ke baad set karo
         const installerExpireTime = new Date();
         installerExpireTime.setHours(installerExpireTime.getHours() + 24);
 
-          const newInstaller = new UserDB({
+        const newInstaller = new UserDB({
             username: guestUsername,
-            email : `${guestUsername}@gmail.com`,
+            email: `${guestUsername}@gmail.com`,
             roles: "installer",
             installer_expire_at: installerExpireTime
         });
@@ -155,36 +162,60 @@ module.exports = {
             process.env.SECRET_KEY,
             { expiresIn: "1h" } // Token expires in 7 days
         );
-        
+
         return { data: newInstaller, token: token };
     },
 
-    add_family_member_service : async(req) => {
+    add_production_user_service: async (req) => {
+        const { username, email } = req.body;
+        if (!username || !email) {
+            throw new Error('Missing username or email');
+        }
+
+        // Check if a user already exists with the provided email
+        const existingUser = await UserDB.findOne({ email: email });
+        if (existingUser) {
+            throw new Error('User with this email already exists');
+        }
+
+        const newProductionUser = new UserDB({
+            username: username,
+            email: email,
+            roles: "production",
+            production_email_status: true
+        });
+
+        await newProductionUser.save();
+
+        return newProductionUser;
+    },
+
+    add_family_member_service: async (req) => {
         const parent = req.user;
         const { email } = req.body;
-        
+
         if (!email) {
             throw new Error('Missing email');
         }
-        
+
         const user = await UserDB.findOne({ email });
         if (user) {
             throw new Error('Email already exist');
         }
-        
+
         const username = generateUsername();
-        
+
         const newFamilyMember = new UserDB({
             username: username,
-            email: email ,
-            roles : 'member'
+            email: email,
+            roles: 'member'
         });
-        
+
         await newFamilyMember.save();
 
         parent.members.push(newFamilyMember._id);
         await parent.save();
-        
+
         return newFamilyMember;
     },
 
