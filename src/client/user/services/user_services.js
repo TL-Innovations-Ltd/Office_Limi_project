@@ -190,6 +190,35 @@ module.exports = {
         return newProductionUser;
     },
 
+    update_production_user_service: async (req) => {
+        const { id } = req.params;
+        const { user_name, production_email_status } = req.body;
+
+        if (!id) {
+            throw new Error('Missing user_id');
+        }
+
+        // Create an update object based on the provided fields
+        const updateFields = {};
+        if (user_name) {
+            updateFields.username = user_name; // Update username if provided
+        }
+        if (production_email_status !== undefined) {
+            updateFields.production_email_status = production_email_status; // Update status if provided
+        }
+
+        // If no fields are provided to update, throw an error
+        if (Object.keys(updateFields).length === 0) {
+            throw new Error('No fields to update');
+        }
+
+        const user = await UserDB.findByIdAndUpdate({ _id: id }, updateFields, { new: true });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user;
+    },
+
     add_family_member_service: async (req) => {
         const parent = req.user;
         const { email } = req.body;
