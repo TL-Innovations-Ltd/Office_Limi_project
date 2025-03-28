@@ -46,6 +46,17 @@ module.exports = {
          }   
     },
 
+    verify_production_user : async(req , res) => {
+        
+        try{
+            const production_user = await user_service.verify_production_user_service(req);
+            res.status(200).json({success : production_user , message : 'production user verified'})
+        }catch(e){
+            console.log(e);
+            res.status(500).json({success  : false , error_message : e.message});
+        }
+    }, 
+
     update_production_user : async(req, res) => {
            try{
               const production_user = await user_service.update_production_user_service(req);

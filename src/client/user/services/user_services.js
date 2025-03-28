@@ -23,14 +23,6 @@ module.exports = {
             throw new Error("Invalid email format");
         }
 
-        const findEmail = await UserDB.findOne({ email: email });
-
-        // Check if the user exists and their role
-        if (findEmail) {
-            if (findEmail.roles === "production") {
-                return 'Production User'; // Return user data if role is production
-            }
-        }
 
         const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
         const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
@@ -97,8 +89,6 @@ module.exports = {
         }
 
         let s = await transporter.sendMail(mailOptions);
-        console.log(s.response);
-
         return 'OTP Send  Succesfully & Expiry in 15 mint';
     },
 
@@ -188,6 +178,24 @@ module.exports = {
         await newProductionUser.save();
 
         return newProductionUser;
+    },
+
+    verify_production_user_service: async (req) => {
+        const { email } = req.body;
+        const findEmail = await UserDB.findOne({ email: email });
+
+        if (!findEmail) {
+            throw new Error('invalid  production email')
+        }
+
+        // Check if the user exists and their role
+        if (findEmail) {
+            if (findEmail.roles === "production") {
+                return true; // Return user data if role is production
+            } else {
+                throw new Error('User is not a production user'); // Throw error if role is not production
+            }
+        }
     },
 
     update_production_user_service: async (req) => {
