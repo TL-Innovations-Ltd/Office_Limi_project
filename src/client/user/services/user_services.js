@@ -23,6 +23,7 @@ module.exports = {
             throw new Error("Invalid email format");
         }
 
+        const findEmail = await UserDB.findOne({ email: email });
 
         const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
         const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
