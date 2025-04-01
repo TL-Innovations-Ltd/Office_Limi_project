@@ -32,10 +32,10 @@ const Use_Schema = new  mongoose.Schema({
            type : mongoose.Schema.Types.ObjectId,
            ref : 'User'
      }],
-      hubs : [{
-        type : mongoose.Schema.Types.ObjectId,
-        ref : 'Hub'
-     }]
+    //   hubs : [{
+    //     type : mongoose.Schema.Types.ObjectId,
+    //     ref : 'Hub'
+    //  }]
     //  masterControllers : [{
     //     type : mongoose.Schema.Types.ObjectId,
     //     ref : 'MasterController'

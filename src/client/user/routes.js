@@ -16,3 +16,5 @@ router.post('/add_family_member' , authClientmiddleware ,  user_controller.add_f
 router.post('/add_production_user' ,  user_controller.add_production_user);
 router.patch('/update_production_user/:id' , user_controller.update_production_user);
 module.exports = router;
+
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTg3NGIyMThhNDE2MjE2NWRlMzQ2MCIsImlhdCI6MTc0MzU0MzQ5MywiZXhwIjoxNzQzNTQ3MDkzfQ.pFY1AMGDqecaNHXahcKwFo2R_wufexrdkrSn8diRTag
