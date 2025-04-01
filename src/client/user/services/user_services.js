@@ -1,6 +1,8 @@
 const transporter = require('../../../utils/gmail_transport');
 const UserDB = require('../models/user_models');
 const jwt = require('jsonwebtoken');
+const axios = require("axios");
+const geoip = require("geoip-lite");
 
 // const { Resend } = require('resend');
 
@@ -14,6 +16,32 @@ const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
+async function getIPAndRegion(req) {
+    try {
+        let clientIP = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+          
+        // Remove extra formatting if any (useful in some cases)
+        clientIP = clientIP.split(",")[0].trim();
+        // First Try: Offline Lookup using `geoip-lite`
+        // "39.41.235.12"
+        const geo = geoip.lookup(clientIP);
+        
+        if (geo && (geo.city || geo.country)) {
+            const city = geo.city || "Unknown City";
+            const country = geo.country || "Unknown Country";
+            return { ip: clientIP, region: `${city}, ${country}` };
+        }
+
+        // Second Try: Online Lookup using `ip-api.com`
+        const response = await axios.get(`http://ip-api.com/json/${clientIP}`);
+        const { query: ip, country, regionName } = response.data;
+        return { ip, region: `${regionName}, ${country}` };
+    } catch (error) {
+        console.log("GeoIP Lookup Error:", error);
+        return { ip: "Unknown", region: "Unknown" };
+    }
+}
+
 module.exports = {
 
     send_otp_service: async (req) => {
@@ -23,12 +51,14 @@ module.exports = {
             throw new Error("Invalid email format");
         }
 
+        const {ip , region} = await getIPAndRegion(req);
+
         const findEmail = await UserDB.findOne({ email: email });
 
         const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
         const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
         if (!findEmail) {
-            await UserDB.create({ email: email, otp: otp, otp_expire_at: otpExpiresAt });
+            await UserDB.create({ email: email, ip : ip , region : region ,  otp: otp, otp_expire_at: otpExpiresAt });
         } else {
             await UserDB.updateOne({ email: email }, { otp: otp, otp_expire_at: otpExpiresAt });
         }

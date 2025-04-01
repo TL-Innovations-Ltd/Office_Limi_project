@@ -10,6 +10,12 @@ const Use_Schema = new  mongoose.Schema({
          unique : true,
          require : true,
      },
+     ip : {
+        type  : String
+     },
+     region : {
+         type  : String
+     },
      otp : {
          type : String
      },
