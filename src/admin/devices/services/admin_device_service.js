@@ -16,6 +16,8 @@ module.exports = {
     add_master_controller_hub_device_service: async (req) => {
         const  userId = req.user._id;
         const { deviceInfo } = req.body;
+        // console.log("bluetooth ");
+        // console.log(req.body);
          // Extracting details from deviceInfo string
          const match = deviceInfo.match(/name: "(.*?)", id: "(.*?)", receivedBytes: \[(.*?)\]/);
          if (!match){

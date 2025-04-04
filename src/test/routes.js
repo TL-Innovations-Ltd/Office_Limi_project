@@ -29,7 +29,7 @@ async function getIPAndRegion(req) {
         const { query: ip, country, regionName } = response.data;
         return { ip, region: `${regionName}, ${country}` };
     } catch (error) {
-        console.log("GeoIP Lookup Error:", error);
+        // console.log("GeoIP Lookup Error:", error);
         return { ip: "Unknown", region: "Unknown" };
     }
 }
@@ -54,7 +54,7 @@ routes.post('/test_latency' , async(req ,res) => {
 
         res.status(200).json(newTest);
     } catch (error) {
-        console.error("Latency Test Error:", error);
+        // console.error("Latency Test Error:", error);
         res.status(500).json({ error: error.message });
     }
 

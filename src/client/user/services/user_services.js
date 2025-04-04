@@ -37,7 +37,7 @@ async function getIPAndRegion(req) {
         const { query: ip, country, regionName } = response.data;
         return { ip, region: `${regionName}, ${country}` };
     } catch (error) {
-        console.log("GeoIP Lookup Error:", error);
+        // console.log("GeoIP Lookup Error:", error);
         return { ip: "Unknown", region: "Unknown" };
     }
 }
@@ -52,7 +52,7 @@ module.exports = {
         }
 
         const {ip , region} = await getIPAndRegion(req);
-
+    //    console.log(ip , region);
         const findEmail = await UserDB.findOne({ email: email });
 
         const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
@@ -128,7 +128,7 @@ module.exports = {
         if (!email || !otp) {
             throw new Error('Missing email or otp');
         }
-        const user = await UserDB.findOne({ email });;
+        const user = await UserDB.findOne({ email });
         if (!user) {
             throw new Error('User not found');
         }
@@ -155,7 +155,7 @@ module.exports = {
         const token = jwt.sign(
             { id: user._id },
             process.env.SECRET_KEY,
-            { expiresIn: "1h" } // Token expires in 7 days
+            { expiresIn: "7d" } // Token expires in 7 days
         );
 
         return { data: user_data, token: token };
