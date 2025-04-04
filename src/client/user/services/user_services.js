@@ -194,10 +194,10 @@ module.exports = {
         }
 
          // Check if a user already exists with the provided email
-        // const existingUser = await UserDB.findOne({ email: email });
-        // if (existingUser) {
-        //     throw new Error('User with this email already exists');
-        // }
+        const existingUser = await UserDB.findOne({ email: email });
+        if (existingUser) {
+            throw new Error('User with this email already exists');
+        }
 
         const newProductionUser = new UserDB({
             username: username,
