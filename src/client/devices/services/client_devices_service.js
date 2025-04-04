@@ -152,7 +152,6 @@ module.exports = {
     processDeviceDataService: async (req) => {
         const userId = req.user._id; // Get user ID from the request
         const { deviceInfo } = req.body; // Extract device information from the request body
-
         // Extracting details from deviceInfo string
         const match = deviceInfo.match(/name: "(.*?)", id: "(.*?)", receivedBytes: \[(.*?)\]\).*?Hex Data: \[(.*?)\]/);
         if (!match) {
