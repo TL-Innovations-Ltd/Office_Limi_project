@@ -94,7 +94,6 @@ module.exports = {
             console.log({success : true , data  : staff_details});
             res.status(200).json({success  : true  , data : staff_details});
         } catch (e) {
-             console.log(e);
              res.status(500).json({success  : false , error_message : e.message});
         }   
     },
@@ -105,8 +104,16 @@ module.exports = {
             res.status(200).json({success  : true  , data : customer_details});
          }
          catch(e)   {
-             console.log(e);
              res.status(500).json({success  : false , error_message : e.message});
+         }
+    },
+
+    get_customer_all_details : async(req , res) => {
+         try{
+             const get_all_data = await user_service.get_customer_all_details_service(req);
+         }
+         catch(e){
+             res.status(500).json({success : false , error_message : e.message})
          }
     }
 }

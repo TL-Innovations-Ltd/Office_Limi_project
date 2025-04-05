@@ -396,5 +396,13 @@ module.exports = {
             throw new Error('Customer not found');
         }
         return customer;
+    },
+
+    get_customer_all_details_service : async(req) => {
+        const customer = await Customer_DB.find({});
+        if (!customer) {
+            throw new Error('Customer not found');
+        }
+        return customer; 
     }
 };
