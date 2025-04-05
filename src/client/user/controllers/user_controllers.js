@@ -111,6 +111,7 @@ module.exports = {
     get_customer_all_details : async(req , res) => {
          try{
              const get_all_data = await user_service.get_customer_all_details_service(req);
+             res.status(200).json({success  : true  , data : get_all_data});
          }
          catch(e){
              res.status(500).json({success : false , error_message : e.message})
