@@ -86,6 +86,27 @@ module.exports = {
             //  console.log(e);
              res.status(500).json({success  : false , error_message : e.message});
          }
-    }
+    },
 
+    customer_capture : async(req ,res) => {
+        try {
+            const staff_details = await user_service.customer_capture_service(req);
+            console.log({success : true , data  : staff_details});
+            res.status(200).json({success  : true  , data : staff_details});
+        } catch (e) {
+             console.log(e);
+             res.status(500).json({success  : false , error_message : e.message});
+        }   
+    },
+
+    get_customer_details : async(req, res) => {
+         try{
+            const customer_details = await user_service.get_customer_details_service(req);
+            res.status(200).json({success  : true  , data : customer_details});
+         }
+         catch(e)   {
+             console.log(e);
+             res.status(500).json({success  : false , error_message : e.message});
+         }
+    }
 }

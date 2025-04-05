@@ -3,11 +3,22 @@ const UserDB = require('../models/user_models');
 const jwt = require('jsonwebtoken');
 const axios = require("axios");
 const geoip = require("geoip-lite");
+const { nanoid } = require('nanoid');
+const Customer_DB = require('../models/customer_capture_model');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+    cloud_name: "drwoekliw",
+    api_key: "253749524177665",
+    api_secret: "ua-T1KruwcdPtoJoUPX8hztSJkU",
+});
 
 // const { Resend } = require('resend');
 
 // const resend = new Resend("re_8Qk5APrR_PCFiD93vLzBXJxhzs8oPsQbC");
 // Generate Random Username Function
+
+
 const generateUsername = () => {
     return "user_" + Math.random().toString(36).substring(2, 10);
 };
@@ -19,13 +30,13 @@ const isValidEmail = (email) => {
 async function getIPAndRegion(req) {
     try {
         let clientIP = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-          
+
         // Remove extra formatting if any (useful in some cases)
         clientIP = clientIP.split(",")[0].trim();
         // First Try: Offline Lookup using `geoip-lite`
         // "39.41.235.12"
         const geo = geoip.lookup(clientIP);
-        
+
         if (geo && (geo.city || geo.country)) {
             const city = geo.city || "Unknown City";
             const country = geo.country || "Unknown Country";
@@ -42,6 +53,24 @@ async function getIPAndRegion(req) {
     }
 }
 
+
+
+const uploadImage = async (imageBase64) => {
+
+    // Ensure the base64 string includes the correct prefix (data URL)
+    if (!imageBase64.startsWith('data:')) {
+        throw new Error('Invalid base64 image format');
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(imageBase64, {
+        folder: 'limi-business-cards',
+    });
+    return {
+        url: uploadResponse.secure_url,
+        id: uploadResponse.public_id,
+    };
+};
+
 module.exports = {
 
     send_otp_service: async (req) => {
@@ -51,14 +80,14 @@ module.exports = {
             throw new Error("Invalid email format");
         }
 
-        const {ip , region} = await getIPAndRegion(req);
-    //    console.log(ip , region);
+        const { ip, region } = await getIPAndRegion(req);
+        //    console.log(ip , region);
         const findEmail = await UserDB.findOne({ email: email });
 
         const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
         const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
         if (!findEmail) {
-            await UserDB.create({ email: email, ip : ip , region : region ,  otp: otp, otp_expire_at: otpExpiresAt });
+            await UserDB.create({ email: email, ip: ip, region: region, otp: otp, otp_expire_at: otpExpiresAt });
         } else {
             await UserDB.updateOne({ email: email }, { otp: otp, otp_expire_at: otpExpiresAt });
         }
@@ -193,7 +222,7 @@ module.exports = {
             throw new Error('Missing username or email');
         }
 
-         // Check if a user already exists with the provided email
+        // Check if a user already exists with the provided email
         const existingUser = await UserDB.findOne({ email: email });
         if (existingUser) {
             throw new Error('User with this email already exists');
@@ -298,5 +327,74 @@ module.exports = {
             throw new Error('User not found');
         }
         return user;
+    },
+
+    customer_capture_service: async (req) => {
+
+        const {
+            staffName,
+            clientName,
+            clientCompanyInfo,
+            itemCodes,
+            nfcData,
+            notes,
+            frontCardImage,
+            backCardImage
+        } = req.body;
+       console.log(req.body);
+        // if (!staffName || !clientName || !clientCompanyInfo || !itemCodes || !frontCardImage || !backCardImage) {
+        //     throw new Error('Missing required fields');
+        // }
+
+        // Extract text from the front and back card images
+        const frontCardImageUrl = await uploadImage(frontCardImage);
+        const backCardImageUrl = await uploadImage(backCardImage);
+
+        // Check if upload failed for front/back card images
+        if (!frontCardImageUrl || !backCardImageUrl) {
+            throw new Error('Front or back card image upload failed');
+        }
+
+        // 2. Generate profile ID and URL
+        const profileId = nanoid(8);
+        const profileUrl = `https://limilighting.co.uk/customer/${profileId}`;
+
+        // Prepare images object
+        const images = {
+            frontCardImage: {
+                url: frontCardImageUrl.url,
+                id: frontCardImageUrl.id
+            },
+            backCardImage: {
+                url: backCardImageUrl.url,
+                id: backCardImageUrl.id
+            }
+        };
+
+        // Save in MongoDB
+        const newEntry = await Customer_DB.create({
+            staffName,
+            clientName,
+            clientCompanyInfo,
+            itemCodes,
+            nfcData,
+            notes,
+            images,
+            profileId,
+            profileUrl,
+        });
+
+        await newEntry.save();
+        return profileUrl;
+
+    },
+
+    get_customer_details_service: async (req) => {
+        const { profileId } = req.params;
+        const customer = await Customer_DB.findOne({ profileId });
+        if (!customer) {
+            throw new Error('Customer not found');
+        }
+        return customer;
     }
-}
+};
