@@ -136,5 +136,15 @@ module.exports = {
          catch(e){
              res.status(500).json({success : false , error_message : e.message})
          }
+    },
+
+    find_user_tracking : async(req ,res) => {
+         try{
+            const user_tracking = await user_service.find_user_tracking_service(req);
+            res.status(200).json({success : true , data  : user_tracking});
+         }
+         catch(e){
+             res.status(500).json({success : false , error_message : e.message});
+         }
     }
 }

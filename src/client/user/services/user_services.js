@@ -419,5 +419,14 @@ module.exports = {
     get_tracking_capture_service : async(req) => {
         const trackingData = await UserTracking.find({});
         return trackingData;
+    },
+
+    find_user_tracking_service : async(req) => {
+          const { customerId } = req.params;
+          if(!customerId){
+             throw new Error("Missing customerId");
+          }
+          const userTrackingData = await UserTracking.find({ customerId });
+          return userTrackingData;
     }
 };
