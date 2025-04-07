@@ -9,7 +9,7 @@ const userTrackingSchema = new mongoose.Schema({
   sessionDuration: { type: Number },
   pagesVisited: { type: [String] },
   consent: { type: Boolean},
-});
+},{timestamps : true});
 
 const UserTracking = mongoose.model('UserTracking', userTrackingSchema);
 
