@@ -414,5 +414,10 @@ module.exports = {
             const userTrackingData = new UserTracking(req.body);
             await userTrackingData.save();
             return userTrackingData;
+    },
+
+    get_tracking_capture_service : async(req) => {
+        const trackingData = await UserTracking.find({});
+        return trackingData;
     }
 };
