@@ -18,6 +18,7 @@ router.patch('/update_production_user/:id' , user_controller.update_production_u
 router.post('/customer_capture' ,  user_controller.customer_capture);
 router.get('/get_customer_details/:profileId' , user_controller.get_customer_details);
 router.get('/get_customer_details' , user_controller.get_customer_all_details);
+router.post('/tracking_capture' ,  user_controller.tracking_capture);
 module.exports = router;
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTg3NGIyMThhNDE2MjE2NWRlMzQ2MCIsImlhdCI6MTc0MzU0MzQ5MywiZXhwIjoxNzQzNTQ3MDkzfQ.pFY1AMGDqecaNHXahcKwFo2R_wufexrdkrSn8diRTag

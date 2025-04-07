@@ -5,6 +5,7 @@ const axios = require("axios");
 const geoip = require("geoip-lite");
 const { nanoid } = require('nanoid');
 const Customer_DB = require('../models/customer_capture_model');
+const UserTracking = require('../models/user_tracking_capture');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
@@ -404,5 +405,14 @@ module.exports = {
             throw new Error('Customer not found');
         }
         return customer; 
+    },
+
+    tracking_capture_service : async(req) => {
+        if(!req.body){
+             throw new Error('No data provided');
+        }
+            const userTrackingData = new UserTracking(req.body);
+            await userTrackingData.save();
+            return userTrackingData;
     }
 };
