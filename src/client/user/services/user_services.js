@@ -342,7 +342,7 @@ module.exports = {
             frontCardImage,
             backCardImage
         } = req.body;
-       console.log(req.body);
+        console.log(req.body);
         // if (!staffName || !clientName || !clientCompanyInfo || !itemCodes || !frontCardImage || !backCardImage) {
         //     throw new Error('Missing required fields');
         // }
@@ -399,34 +399,66 @@ module.exports = {
         return customer;
     },
 
-    get_customer_all_details_service : async(req) => {
+    get_customer_all_details_service: async (req) => {
         const customer = await Customer_DB.find({});
         if (!customer) {
             throw new Error('Customer not found');
         }
-        return customer; 
+        return customer;
     },
 
-    tracking_capture_service : async(req) => {
-        if(!req.body){
-             throw new Error('No data provided');
+    tracking_capture_service: async (req) => {
+        if (!req.body) {
+            throw new Error('No data provided');
         }
+        // Check if it's a POST or PATCH request
+        if (req.body._method === 'POST') {
+            // Create new tracking record
             const userTrackingData = new UserTracking(req.body);
             await userTrackingData.save();
             return userTrackingData;
+        } else if (req.body._method === 'PATCH') {
+            // Update existing tracking record
+            const { sessionId } = req.body;
+            if (!sessionId) {
+                throw new Error('Session ID is required for update');
+            }
+
+            // Find the existing tracking record
+            const existingTrackingData = await UserTracking.findOne({ sessionId });
+
+            if (!existingTrackingData) {
+                throw new Error('Tracking record not found');
+            }
+
+            // Update the existing record
+            Object.keys(req.body).forEach(key => {
+                if (key !== 'sessionId') {
+                    existingTrackingData[key] = req.body[key];
+                }
+            });
+
+            await existingTrackingData.save();
+            return existingTrackingData;
+        }
     },
 
-    get_tracking_capture_service : async(req) => {
+    get_tracking_capture_service: async (req) => {
         const trackingData = await UserTracking.find({});
         return trackingData;
     },
 
-    find_user_tracking_service : async(req) => {
-          const { customerId } = req.params;
-          if(!customerId){
-             throw new Error("Missing customerId");
-          }
-          const userTrackingData = await UserTracking.find({ customerId });
-          return userTrackingData;
+    find_user_tracking_service: async (req) => {
+        const { customerId } = req.params;
+        if (!customerId) {
+            throw new Error("Missing customerId");
+        }
+        const userTrackingData = await UserTracking.find({ customerId });
+        return userTrackingData;
+    },
+
+    get_user_capture_service : async(req) => {
+        const userCaptureData = await UserDB.find({});
+        return userCaptureData;
     }
 };

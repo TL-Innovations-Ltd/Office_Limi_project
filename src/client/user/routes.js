@@ -20,7 +20,10 @@ router.get('/get_customer_details/:profileId' , user_controller.get_customer_det
 router.get('/get_customer_details' , user_controller.get_customer_all_details);
 router.post('/tracking_capture' ,  user_controller.tracking_capture);
 router.get('/get_tracking_capture' , user_controller.get_tracking_capture);
-router.get('/user_tracking/:customerId', user_controller.find_user_tracking);;
+router.get('/user_tracking/:customerId', user_controller.find_user_tracking);
+router.get('/get_user_capture' , user_controller.get_user_capture);
+
+
 module.exports = router;
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTg3NGIyMThhNDE2MjE2NWRlMzQ2MCIsImlhdCI6MTc0MzU0MzQ5MywiZXhwIjoxNzQzNTQ3MDkzfQ.pFY1AMGDqecaNHXahcKwFo2R_wufexrdkrSn8diRTag

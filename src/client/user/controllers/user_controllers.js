@@ -121,6 +121,7 @@ module.exports = {
     tracking_capture : async(req ,res) => {
          try{
             const tracking_data = await user_service.tracking_capture_service(req);
+
             res.status(200).json({success : true , data  : tracking_data});
          }
          catch(e){
@@ -142,6 +143,16 @@ module.exports = {
          try{
             const user_tracking = await user_service.find_user_tracking_service(req);
             res.status(200).json({success : true , data  : user_tracking});
+         }
+         catch(e){
+             res.status(500).json({success : false , error_message : e.message});
+         }
+    },
+
+    get_user_capture : async (req, res) => {
+          try{
+            const user_capture = await user_service.get_user_capture_service(req);
+            res.status(200).json({success : true , data  : user_capture});
          }
          catch(e){
              res.status(500).json({success : false , error_message : e.message});
