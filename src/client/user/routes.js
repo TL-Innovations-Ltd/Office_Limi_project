@@ -27,3 +27,4 @@ router.get('/get_user_capture' , user_controller.get_user_capture);
 module.exports = router;
 
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTg3NGIyMThhNDE2MjE2NWRlMzQ2MCIsImlhdCI6MTc0MzU0MzQ5MywiZXhwIjoxNzQzNTQ3MDkzfQ.pFY1AMGDqecaNHXahcKwFo2R_wufexrdkrSn8diRTag
+

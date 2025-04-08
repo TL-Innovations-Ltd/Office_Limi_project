@@ -411,26 +411,19 @@ module.exports = {
         if (!req.body) {
             throw new Error('No data provided');
         }
-        // Check if it's a POST or PATCH request
-        if (req.body._method === 'POST') {
-            // Create new tracking record
+        
+        // Ensure sessionId is present in the request body
+        if (!req.body.sessionId) {
+            throw new Error('Session ID is required');
+        }
+          // Find the existing tracking record
+          const existingTrackingData = await UserTracking.findOne({ sessionId: req.body.sessionId });
+          if (!existingTrackingData) {
             const userTrackingData = new UserTracking(req.body);
             await userTrackingData.save();
             return userTrackingData;
-        } else if (req.body._method === 'PATCH') {
-            // Update existing tracking record
-            const { sessionId } = req.body;
-            if (!sessionId) {
-                throw new Error('Session ID is required for update');
-            }
-
-            // Find the existing tracking record
-            const existingTrackingData = await UserTracking.findOne({ sessionId });
-
-            if (!existingTrackingData) {
-                throw new Error('Tracking record not found');
-            }
-
+          }
+       
             // Update the existing record
             Object.keys(req.body).forEach(key => {
                 if (key !== 'sessionId') {
@@ -440,7 +433,6 @@ module.exports = {
 
             await existingTrackingData.save();
             return existingTrackingData;
-        }
     },
 
     get_tracking_capture_service: async (req) => {
