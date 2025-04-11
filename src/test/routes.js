@@ -6,6 +6,7 @@ const ping = require("ping");
 const axios = require("axios");
 const geoip = require("geoip-lite");
 const ServerTest = require("./models/test_models");
+const testDocs = require("./docs");
 
 // Function to Get IP & Region Automatically
 async function getIPAndRegion(req) {
@@ -35,7 +36,7 @@ async function getIPAndRegion(req) {
 }
 
 
-routes.post('/test_latency' , async(req ,res) => {
+routes.post('/test_latency' , testDocs.testLatency ,  async(req ,res) => {
      try {
       const start = Date.now(); 
     const { ip, region } = await getIPAndRegion(req);

@@ -1073,8 +1073,27 @@
     },
     "/process_device_data": {
       "post": {
-        "description": "",
+        "tags": [
+          "Device Control"
+        ],
+        "summary": "Process device control data",
+        "description": "Endpoint to handle device data for PWM, RGB, and Mini Controller modes",
         "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Device control data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deviceInfo": {
+                  "type": "string",
+                  "example": "text"
+                }
+              }
+            }
+          },
           {
             "name": "Authorization",
             "in": "header",
@@ -1082,19 +1101,118 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Device data processed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Device settings saved"
+                    },
+                    "deviceSettings": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "example": "User ID"
+                        },
+                        "macAddress": {
+                          "type": "string",
+                          "example": "Device MAC address"
+                        },
+                        "cool": {
+                          "type": "string",
+                          "example": "Cool color temperature (-100 to 100)"
+                        },
+                        "warm": {
+                          "type": "string",
+                          "example": "Warm color temperature (-100 to 100)"
+                        },
+                        "brightness": {
+                          "type": "string",
+                          "example": "Brightness level (0-100)"
+                        },
+                        "red": {
+                          "type": "string",
+                          "example": "Red color value (0-255)"
+                        },
+                        "green": {
+                          "type": "string",
+                          "example": "Green color value (0-255)"
+                        },
+                        "blue": {
+                          "type": "string",
+                          "example": "Blue color value (0-255)"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
+          },
+          "500": {
+            "description": "Failed to process device data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         }
       }
     },
     "/add_master_controller_hub_device": {
       "post": {
-        "description": "",
+        "tags": [
+          "Admin Device Management"
+        ],
+        "summary": "Add Master Controller Hub Device",
+        "description": "Endpoint to register a new hub device for a master controller",
         "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Hub device information",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deviceInfo": {
+                  "type": "string",
+                  "example": "text"
+                }
+              }
+            }
+          },
           {
             "name": "Authorization",
             "in": "header",
@@ -1102,18 +1220,73 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Hub device successfully registered",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "example": "User ID who registered the device"
+                    },
+                    "macAddress": {
+                      "type": "string",
+                      "example": "Unique MAC address of the hub"
+                    },
+                    "deviceName": {
+                      "type": "string",
+                      "example": "Name of the hub device"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
+          },
+          "500": {
+            "description": "Failed to register hub device",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         }
       }
     },
     "/test_latency": {
       "post": {
-        "description": "",
+        "tags": [
+          "Server Testing"
+        ],
+        "summary": "Test Server Latency",
+        "description": "Endpoint to measure server latency and record client IP information",
         "parameters": [
           {
             "name": "x-forwarded-for",
@@ -1123,13 +1296,65 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Latency test completed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "example": "Unique MongoDB document ID"
+                },
+                "ip": {
+                  "type": "string",
+                  "example": "Client IP address"
+                },
+                "region": {
+                  "type": "string",
+                  "example": "Geographical region of the client"
+                },
+                "latency": {
+                  "type": "string",
+                  "example": "Latency in milliseconds"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "example": "Timestamp of the test"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Failed to determine client IP",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Could not determine IP"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error during latency test",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Detailed error message"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         }
       }
