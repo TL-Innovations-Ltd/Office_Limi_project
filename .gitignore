@@ -2,17 +2,20 @@ node_modules/
 .env
 
 # Docker-specific ignores
-.docker
+*.dockerfile
 *.dockerfile.swp
-docker-compose.override.yml
+Dockerfile
+docker-compose*.yml
+.docker
 .dockerignore
+docker-volumes/
+*.docker
+*.docker.yml
 
 # Ignore build artifacts
 build/
 dist/
 
-# Ignore local Docker volumes
-docker-volumes/
-
 # Ignore Docker-related logs
+*.docker.log
 docker-compose.log
