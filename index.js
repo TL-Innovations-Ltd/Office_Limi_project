@@ -1,8 +1,11 @@
 const express = require('express');
-require('dotenv').config();
-const app = express();
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./src/config/swagger-output.json');
 const cors = require('cors');
 const connectDB = require('./src/connection/DB_connection');
+
+
+const app = express();
 
 const user_routes = require('./src/client/user/routes');
 const test_ping = require('./src/test/routes');
@@ -22,15 +25,17 @@ connectDB();
 // for MQTT connection
 // require('./src/client/hive_MQTT_connection/mqtt_services');
 
-
 // 🔥 Auto Unlink Script Require Karo
 require('./src/client/node_cron_timer/node_cron_timer');
 
-app.use('/client' , user_routes);
-app.use('/server' , test_ping);
-app.use('/client/devices' , device_routes);
-app.use('/admin' , admin_device_routes );
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
+app.use('/client', user_routes);
+app.use('/server', test_ping);
+app.use('/client/devices', device_routes);
+app.use('/admin', admin_device_routes);
 
-app.listen( process.env.PORT ,() => console.log('🌐 Server is running on port 3000'));
-// module.exports = app;
+app.listen(process.env.PORT, () => {
+    console.log(`🌐 Server started on port ${process.env.PORT}`);
+});

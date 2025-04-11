@@ -1,0 +1,1138 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Light Control System Backend ( Suzair )",
+    "description": "API documentation for Light Control System",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/test": {
+      "get": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Test endpoint",
+        "description": "A simple test route to check server status",
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Test"
+                },
+                "port": {
+                  "type": "string",
+                  "example": "Server port number"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/send_otp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Send OTP to user",
+        "description": "Endpoint to send One-Time Password (OTP) to user\\'s email for verification",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User email for OTP",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "otp": {
+                  "type": "string",
+                  "example": "OTP sent successfully & expires in 15 minutes"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify_production": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Verify production user",
+        "description": "Endpoint to verify a production user\\'s email",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Production user email",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "production@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Production user verified successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "production user verified"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Verification failed",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify_otp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Verify OTP",
+        "description": "Endpoint to verify One-Time Password (OTP) sent to user\\'s email",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User email and OTP",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "otp": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "User created"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "user_data": {
+                      "type": "string",
+                      "example": "User details"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "JWT authentication token"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "OTP verification failed",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/installer_user": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Create installer user",
+        "description": "Endpoint to create a temporary installer user account",
+        "responses": {
+          "200": {
+            "description": "Installer user created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Installer User created"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "user_details": {
+                      "type": "string",
+                      "example": "Temporary installer user information"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "JWT authentication token"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to create installer user",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/update_name/{id}": {
+      "patch": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Update user name",
+        "description": "Endpoint to update a user\\'s username",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New username",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user_name": {
+                  "type": "string",
+                  "example": "new_username"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Username updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Username Updated"
+                },
+                "data": {
+                  "type": "string",
+                  "example": "Updated user details"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to update username",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add_family_member": {
+      "post": {
+        "tags": [
+          "Family Management"
+        ],
+        "summary": "Add family member",
+        "description": "Endpoint to add a new family member (requires authentication)",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Family member email",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "familymember@example.com"
+                }
+              }
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Family member added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Family member added"
+                },
+                "data": {
+                  "type": "string",
+                  "example": "New family member details"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Failed to add family member",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/add_production_user": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Add production user",
+        "description": "Endpoint to create a new production user account",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Production user details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "example": "production_user"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "production@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Production user added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "New production user details"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to add production user",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/update_production_user/{id}": {
+      "patch": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Update production user",
+        "description": "Endpoint to update production user details",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Production user ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated user details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user_name": {
+                  "type": "string",
+                  "example": "new_username"
+                },
+                "production_email_status": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Production user updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "Updated production user details"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to update production user",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer_capture": {
+      "post": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Capture customer details",
+        "description": "Endpoint to capture and store customer information",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Customer capture details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "staffName": {
+                  "type": "string",
+                  "example": "Staff Name"
+                },
+                "clientName": {
+                  "type": "string",
+                  "example": "Client Name"
+                },
+                "clientCompanyInfo": {
+                  "type": "string",
+                  "example": "Company Information"
+                },
+                "itemCodes": {
+                  "type": "array",
+                  "example": [
+                    "item1",
+                    "item2"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "nfcData": {
+                  "type": "string",
+                  "example": "NFC Information"
+                },
+                "notes": {
+                  "type": "string",
+                  "example": "Additional notes"
+                },
+                "frontCardImage": {
+                  "type": "string",
+                  "example": "Base64 encoded front card image"
+                },
+                "backCardImage": {
+                  "type": "string",
+                  "example": "Base64 encoded back card image"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer details captured successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "Profile URL for the captured customer"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to capture customer details",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_customer_details/{profileId}": {
+      "get": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Get customer details",
+        "description": "Endpoint to retrieve customer details by profile ID",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "description": "Customer profile ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer details retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "Detailed customer information"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to retrieve customer details",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_customer_details": {
+      "get": {
+        "tags": [
+          "Customer Management"
+        ],
+        "summary": "Get all customer details",
+        "description": "Endpoint to retrieve details of all customers",
+        "responses": {
+          "200": {
+            "description": "All customer details retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "List of all customer details"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to retrieve customer details",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tracking_capture": {
+      "post": {
+        "tags": [
+          "Tracking"
+        ],
+        "summary": "Capture user tracking data",
+        "description": "Endpoint to capture and store user tracking information",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User tracking data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sessionId": {
+                  "type": "string",
+                  "example": "Unique session identifier"
+                },
+                "customerId": {
+                  "type": "string",
+                  "example": "Customer ID"
+                },
+                "trackingDetails": {
+                  "type": "string",
+                  "example": "Tracking information"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tracking data captured successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "Captured tracking information"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to capture tracking data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_tracking_capture": {
+      "get": {
+        "tags": [
+          "Tracking"
+        ],
+        "summary": "Get all tracking captures",
+        "description": "Endpoint to retrieve all user tracking data",
+        "responses": {
+          "200": {
+            "description": "Tracking data retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "List of all tracking captures"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to retrieve tracking data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user_tracking/{customerId}": {
+      "get": {
+        "tags": [
+          "Tracking"
+        ],
+        "summary": "Get user tracking by customer ID",
+        "description": "Endpoint to retrieve tracking data for a specific customer",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "description": "Customer ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User tracking data retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "Tracking information for the specified customer"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to retrieve user tracking data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_user_capture": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Get all user captures",
+        "description": "Endpoint to retrieve details of all captured users",
+        "responses": {
+          "200": {
+            "description": "User capture data retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "type": "string",
+                  "example": "List of all user captures"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to retrieve user capture data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "error_message": {
+                  "type": "string",
+                  "example": "Detailed error description"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/process_device_data": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/add_master_controller_hub_device": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/test_latency": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-forwarded-for",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  }
+}

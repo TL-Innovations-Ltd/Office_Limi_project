@@ -149,7 +149,7 @@ module.exports = {
        `
         }
 
-        let s = await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
         return 'OTP Send  Succesfully & Expiry in 15 mint';
     },
 
@@ -411,28 +411,28 @@ module.exports = {
         if (!req.body) {
             throw new Error('No data provided');
         }
-        
+
         // Ensure sessionId is present in the request body
         if (!req.body.sessionId) {
             throw new Error('Session ID is required');
         }
-          // Find the existing tracking record
-          const existingTrackingData = await UserTracking.findOne({ sessionId: req.body.sessionId });
-          if (!existingTrackingData) {
+        // Find the existing tracking record
+        const existingTrackingData = await UserTracking.findOne({ sessionId: req.body.sessionId });
+        if (!existingTrackingData) {
             const userTrackingData = new UserTracking(req.body);
             await userTrackingData.save();
             return userTrackingData;
-          }
-       
-            // Update the existing record
-            Object.keys(req.body).forEach(key => {
-                if (key !== 'sessionId') {
-                    existingTrackingData[key] = req.body[key];
-                }
-            });
+        }
 
-            await existingTrackingData.save();
-            return existingTrackingData;
+        // Update the existing record
+        Object.keys(req.body).forEach(key => {
+            if (key !== 'sessionId') {
+                existingTrackingData[key] = req.body[key];
+            }
+        });
+
+        await existingTrackingData.save();
+        return existingTrackingData;
     },
 
     get_tracking_capture_service: async (req) => {
@@ -449,7 +449,7 @@ module.exports = {
         return userTrackingData;
     },
 
-    get_user_capture_service : async(req) => {
+    get_user_capture_service: async (req) => {
         const userCaptureData = await UserDB.find({});
         return userCaptureData;
     }

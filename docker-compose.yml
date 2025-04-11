@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URL=${MONGO_URL}
+      - NODE_ENV=production
+    volumes:
+      - .:/src
+      - /src/node_modules
+    restart: unless-stopped
