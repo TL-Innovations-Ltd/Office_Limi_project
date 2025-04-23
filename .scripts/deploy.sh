@@ -21,3 +21,4 @@ npm install
 # Restart app with pm2
 echo "Restarting app with PM2..."
 pm2 restart limi_backend
+
