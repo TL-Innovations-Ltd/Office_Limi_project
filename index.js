@@ -16,7 +16,7 @@ app.use(
     })
 );
 
-// Suzair new Deployment Strategy 
+
 
 
 app.use(express.json({ limit: '50mb' }));
