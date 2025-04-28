@@ -31,7 +31,6 @@
     "nodemon": "^3.1.9",
     "ping": "^0.4.4",
     "resend": "^4.1.2",
-    "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tesseract.js": "^6.0.0",

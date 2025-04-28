@@ -1,6 +1,4 @@
 const express = require('express');
-const swaggerUi = require('swagger-ui-express');
-const swaggerFile = require('./src/config/swagger-output.json');
 const cors = require('cors');
 const connectDB = require('./src/connection/DB_connection');
 
@@ -17,7 +15,10 @@ app.use(
         origin: "*"
     })
 );
-// SUZAIR testTING Again
+
+// Suzair new Deployment Strategy 
+
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -27,9 +28,6 @@ connectDB();
 
 // 🔥 Auto Unlink Script Require Karo
 require('./src/client/node_cron_timer/node_cron_timer');
-
-// Serve Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.use('/client', user_routes);
 app.use('/server', test_ping);

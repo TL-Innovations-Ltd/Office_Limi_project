@@ -11,20 +11,5 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Nodemailer Setup
-// const transporter = nodemailer.createTransport({
-//     host: "smtp.gmail.com",  
-//     port: 587,  
-//     secure: false, 
-//     auth: {
-//         user: process.env.GMAIL_SECRET_EMIAL, 
-//         pass: process.env.GMAIL_SECRET_PASS
-//     },
-//      tls: {
-//         rejectUnauthorized: false 
-//     },
-// });
-
-
 // Directly Exporting Transporter
 module.exports = transporter;
