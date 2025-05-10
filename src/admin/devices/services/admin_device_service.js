@@ -24,7 +24,7 @@ module.exports = {
              throw new  Error('Fomrat invalid')
          }
 
-         const name = match[1];
+        const name = match[1];
         const id = match[2];
         const receivedBytes = match[3].split(',').map(Number); // Convert to array of numbers
 

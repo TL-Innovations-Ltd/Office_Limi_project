@@ -20,7 +20,8 @@ function subscribeMessage(topic) {
             if (err) {
                 reject({topic : topic , error_message : err});
             } else {
-                // console.log(`Listening  to ${topic} topic`);
+                console.log(`Listening  to ${topic} topic`);
+                resolve({ topic });
             }
         });
     });
@@ -33,19 +34,19 @@ mqttClient.on('message', (receivedTopic, message) => {
 });
 
 // ✅ Server Start hote hi MQTT connection initialize ho jayega
-mqttClient.on("connect", async() => {
+mqttClient.on("connect", async () => {
     console.log("✅ MQTT Broker Connected Successfully");
 
     try {
-        const publishResponse = await publishMessage('suzair', { name: 'test', message: 'Hello World' });
+        const subscribeResponse = await subscribeMessage('suzair');
+        console.log(subscribeResponse);
+
+        const publishResponse = await publishMessage('suzair', { message: "Hello from backend" });
         console.log(publishResponse);
 
-        const listenmsg = await subscribeMessage('suzair'); // Replace 'test' with your actual topic
-        console.log(listenmsg);
     } catch (error) {
         console.log(` erro : ${error.topic} : ${error.error_message}`);
     }
-
 });
 
 mqttClient.on("error", (error) => {
