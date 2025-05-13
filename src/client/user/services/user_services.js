@@ -59,9 +59,9 @@ async function getIPAndRegion(req) {
 const uploadImage = async (imageBase64) => {
 
     // Ensure the base64 string includes the correct prefix (data URL)
-    if (!imageBase64.startsWith('data:')) {
-        throw new Error('Invalid base64 image format');
-    }
+    // if (!imageBase64.startsWith('data:')) {
+    //     throw new Error('Invalid base64 image format');
+    // }
 
     const uploadResponse = await cloudinary.uploader.upload(imageBase64, {
         folder: 'limi-business-cards',
@@ -342,7 +342,7 @@ module.exports = {
             frontCardImage,
             backCardImage
         } = req.body;
-        console.log(req.body);
+        // console.log(req.body);
         // if (!staffName || !clientName || !clientCompanyInfo || !itemCodes || !frontCardImage || !backCardImage) {
         //     throw new Error('Missing required fields');
         // }
@@ -351,10 +351,10 @@ module.exports = {
         const frontCardImageUrl = await uploadImage(frontCardImage);
         const backCardImageUrl = await uploadImage(backCardImage);
 
-        // Check if upload failed for front/back card images
-        if (!frontCardImageUrl || !backCardImageUrl) {
-            throw new Error('Front or back card image upload failed');
-        }
+        // // Check if upload failed for front/back card images
+        // if (!frontCardImageUrl || !backCardImageUrl) {
+        //     throw new Error('Front or back card image upload failed');
+        // }
 
         // 2. Generate profile ID and URL
         const profileId = nanoid(8);
