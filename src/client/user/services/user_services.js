@@ -391,6 +391,34 @@ module.exports = {
         return profileUrl;
     },
 
+    delete_customer_capture_service: async (req) => {
+        const { profileId } = req.params;
+
+        if (!profileId) {
+            throw new Error('Profile ID is required');
+        }
+        
+        // Use findOneAndDelete directly which returns the deleted document
+        const customer = await Customer_DB.findOneAndDelete({ _id: profileId });
+        
+        if (!customer) {
+            throw new Error('Customer not found');
+        }
+        
+        // If there are images associated with the customer, delete them from Cloudinary
+        if (customer.images) {
+            if (customer.images.frontCardImage && customer.images.frontCardImage.id) {
+                await cloudinary.uploader.destroy(customer.images.frontCardImage.id);
+            }
+            
+            if (customer.images.backCardImage && customer.images.backCardImage.id) {
+                await cloudinary.uploader.destroy(customer.images.backCardImage.id);
+            }
+        }
+        
+        return true;
+    },
+
     get_customer_details_service: async (req) => {
         const { profileId } = req.params;
         const customer = await Customer_DB.findOne({ profileId });

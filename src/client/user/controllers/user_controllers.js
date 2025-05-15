@@ -98,6 +98,15 @@ module.exports = {
         }   
     },
 
+    delete_customer_capture : async(req, res) => {
+        try {
+            const result = await user_service.delete_customer_capture_service(req);
+            res.status(200).json({success: true, message: 'Customer capture deleted successfully'});
+        } catch (e) {
+            res.status(500).json({success: false, error_message: e.message});
+        }
+    },
+
     get_customer_details : async(req, res) => {
          try{
             const customer_details = await user_service.get_customer_details_service(req);

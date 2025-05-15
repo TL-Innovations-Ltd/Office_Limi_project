@@ -26,6 +26,8 @@ router.patch('/update_production_user/:id', user_controller.update_production_us
 
 router.post('/customer_capture', user_controller.customer_capture);
 
+router.delete('/customer_capture/:profileId', user_controller.delete_customer_capture);
+
 router.get('/get_customer_details/:profileId', user_controller.get_customer_details);
 
 router.get('/get_customer_details', user_controller.get_customer_all_details);
