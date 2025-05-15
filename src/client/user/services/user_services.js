@@ -331,7 +331,6 @@ module.exports = {
     },
 
     customer_capture_service: async (req) => {
-
         const {
             staffName,
             clientName,
@@ -342,35 +341,38 @@ module.exports = {
             frontCardImage,
             backCardImage
         } = req.body;
-        // console.log(req.body);
-        // if (!staffName || !clientName || !clientCompanyInfo || !itemCodes || !frontCardImage || !backCardImage) {
-        //     throw new Error('Missing required fields');
-        // }
 
-        // Extract text from the front and back card images
-        const frontCardImageUrl = await uploadImage(frontCardImage);
-        const backCardImageUrl = await uploadImage(backCardImage);
+        // Validate required fields
+        if (!staffName || !clientName) {
+            throw new Error('Staff name and client name are required');
+        }
 
-        // // Check if upload failed for front/back card images
-        // if (!frontCardImageUrl || !backCardImageUrl) {
-        //     throw new Error('Front or back card image upload failed');
-        // }
-
-        // 2. Generate profile ID and URL
-        const profileId = nanoid(8);
-        const profileUrl = `https://limilighting.co.uk/customer/${profileId}`;
-
-        // Prepare images object
-        const images = {
-            frontCardImage: {
-                url: frontCardImageUrl.url,
-                id: frontCardImageUrl.id
-            },
-            backCardImage: {
-                url: backCardImageUrl.url,
-                id: backCardImageUrl.id
+        let images = {};
+        
+        // Only attempt image upload if images are provided
+        if (frontCardImage) {
+            const frontCardImageUrl = await uploadImage(frontCardImage);
+            if (frontCardImageUrl) {
+                images.frontCardImage = {
+                    url: frontCardImageUrl.url,
+                    id: frontCardImageUrl.id
+                };
             }
-        };
+        }
+
+        if (backCardImage) {
+            const backCardImageUrl = await uploadImage(backCardImage);
+            if (backCardImageUrl) {
+                images.backCardImage = {
+                    url: backCardImageUrl.url,
+                    id: backCardImageUrl.id
+                };
+            }
+        }
+
+        // Generate profile ID and URL
+        const profileId = nanoid(8);
+        const profileUrl = `https://limilighting.com/customer/${profileId}`;
 
         // Save in MongoDB
         const newEntry = await Customer_DB.create({
@@ -387,7 +389,6 @@ module.exports = {
 
         await newEntry.save();
         return profileUrl;
-
     },
 
     get_customer_details_service: async (req) => {
