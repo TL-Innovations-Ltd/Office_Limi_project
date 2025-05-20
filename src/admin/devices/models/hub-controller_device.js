@@ -7,7 +7,8 @@ const HubSchema = new mongoose.Schema({
   deviceName: { type: String, required: true },
   macAddress: { type: String, unique: true, required: true },
   hubType: { type: Number,  default : 1},
-  pwm : { type: mongoose.Schema.Types.ObjectId, ref: "PWM" }
+  pwm : { type: mongoose.Schema.Types.ObjectId, ref: "PWM" },
+  status : { type : String , default : "offline"},
 }, { timestamps: true });
 
 module.exports = mongoose.model("Hub", HubSchema);

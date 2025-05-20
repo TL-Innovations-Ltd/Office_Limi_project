@@ -3,10 +3,10 @@ const RGB_DB = require('../../../admin/devices/models/rgb_controller_device');
 // const Master_Controller_DB = require('../../../admin/devices/models/master-controller_device');
 const Hub_DB = require('../../../admin/devices/models/hub-controller_device');
 const User_DB = require('../../user/models/user_models');
+const { publishMessage , TOPICS } = require('../../hive_MQTT_connection/mqtt_services');
 
 module.exports = {
 
-    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZWU4ODcwNmZjNzE3NjY3YjExZjdhMyIsImlhdCI6MTc0MzY4NTk2MywiZXhwIjoxNzQ0MjkwNzYzfQ.SxB20DlDOQ_tDuV_UcG9ne8naO6mGoteWo1f5ifSLoI
 
     // pwm_light_control_service: async (req) => {
     //     const userId = req.user._id;
@@ -165,13 +165,15 @@ module.exports = {
         // Determine mode from hexData[0]
         const mode = hexData[0];
 
-        if (mode === 0x01) {
-            // console.log("Pwm lights");
-            // PWM Mode
-            // const cool = hexData[1];
-            // const warm = hexData[2];
-            // const brightness = hexData[3];
+        await publishMessage(`${TOPICS.DEVICE_CONTROL}`, {
+            receivedBytes : receivedBytes,
+            hexData : hexData,
+            timestamp: new Date().toISOString()
+        });
 
+        if (mode === 0x01) {
+            
+ 
             const cool = ((128 - hexData[1]) / 128) * 100; // Converts Hex (0-255) to -100 to 100 scale
             const warm = ((hexData[2] - 128) / 128) * 100;  // Converts Hex (0-255) to -100 to 100 scale
             const brightness = (hexData[3] / 255) * 100;    // Converts Hex (0-255) to 0-100%
@@ -188,6 +190,7 @@ module.exports = {
             return { message: "PWM settings saved successfully", pwmSettings };
 
         } else if (mode === 0x02) {
+
             // console.log("RGB lights");
             // RGB Mode
             const red = hexData[1];
@@ -205,16 +208,12 @@ module.exports = {
             return { message: "RGB settings saved successfully", rgbSettings };
 
         } else if (mode === 0x03) {
-            // console.log("Mini Controller Mode");
+
             // Mini Controller Mode
             const outputNumber = hexData[1];
 
             if (outputNumber >= 1 && outputNumber <= 5) {
-                // console.log("Mini Controller PWM Mode");
-                // PWM output
-                // const cool = hexData[2];
-                // const warm = hexData[3];
-                // const brightness = hexData[4];
+              
 
                 const cool = ((128 - hexData[1]) / 128) * 100; // Converts Hex (0-255) to -100 to 100 scale
                 const warm = ((hexData[2] - 128) / 128) * 100;  // Converts Hex (0-255) to -100 to 100 scale
@@ -232,7 +231,7 @@ module.exports = {
                 return { message: "Mini Controller PWM settings saved successfully", miniPwmSettings };
 
             } else if (outputNumber >= 6 && outputNumber <= 7) {
-                // console.log("Mini Controller RGB Mode");
+   
                 // RGB output
                 const red = hexData[2];
                 const green = hexData[3];

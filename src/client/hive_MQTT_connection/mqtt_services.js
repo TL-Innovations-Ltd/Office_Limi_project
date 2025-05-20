@@ -3,10 +3,12 @@ const Hub_DB = require('../../admin/devices/models/hub-controller_device');
 
 // Topic constants
 const TOPICS = {
-    DEVICE_STATUS: 'device/+/status',    // For device status updates
-    DEVICE_CONTROL: 'device/control/',    // For sending commands to devices
-    DEVICE_DATA: 'device/+/data'         // For receiving data from devices
+    DEVICE_STATUS: 'status',    // For device status updates
+    DEVICE_CONTROL: 'data',    // For sending commands to devices
+    DEVICE_DATA: 'disconnect',         // For receiving data from devices
+    DEVICE_CREDENTIALS : 'credentials'
 };
+
 
 // Function to publish a message with QoS 1
 function publishMessage(topic, payload) {
@@ -31,7 +33,6 @@ function subscribeMessage(topic) {
                 console.error(`Failed to subscribe to ${topic}:`, err);
                 reject({ topic, error_message: err });
             } else {
-                console.log(`✅ Subscribed to ${topic}`);
                 resolve({ topic });
             }
         });
@@ -41,23 +42,29 @@ function subscribeMessage(topic) {
 // Handle all device messages
 mqttClient.on('message', async (topic, message) => {
     try {
-        console.log(`Message Received on ${topic}:`, message.toString());
-        const messageData = JSON.parse(message.toString());
+        console.log('Raw message received:', {
+            topic,
+            message: message.toString(),
+            timestamp: new Date().toISOString()
+        });
+        const parsed = JSON.parse(message.toString());
 
-        if (topic.startsWith('device/')) {
-            const [, macAddress, messageType] = topic.split('/');
+        switch (topic) {
+            case 'status':
+                console.log('📡 Device connected:', parsed);
+                handleDeviceStatus(parsed.macAddress)
+                break;
 
-            // Handle different message types
-            switch (messageType) {
-                case 'status':
-                    await handleDeviceStatus(macAddress, messageData);
-                    break;
-                case 'data':
-                    await handleDeviceData(macAddress, messageData);
-                    break;
-                default:
-                    console.warn(`Unknown message type: ${messageType}`);
-            }
+            case 'data':
+                console.log('🌡️ Temperature reading:', parsed);
+                break;
+
+            case 'disconnect':
+                console.log('🔌 Device disconnected:', parsed);
+                break;
+
+            default:
+                console.warn('⚠️ Unknown topic:', topic);
         }
     } catch (error) {
         console.error('Error processing MQTT message:', error);
@@ -65,68 +72,46 @@ mqttClient.on('message', async (topic, message) => {
 });
 
 // Handle device status updates
-async function handleDeviceStatus(macAddress, messageData) {
+async function handleDeviceStatus(macAddress) {
     try {
         const hub = await Hub_DB.findOne({ macAddress });
-        
+
         if (hub) {
-            // Device is registered, send authorization
-            await publishMessage(`${TOPICS.DEVICE_CONTROL}${macAddress}`, {
-                status: 'AUTHORIZED',
-                deviceId: hub._id,
-                deviceName: hub.deviceName,
-                timestamp: new Date().toISOString()
-            });
 
             // Update device status in database
             await Hub_DB.updateOne(
                 { macAddress },
-                { 
-                    $set: { 
-                        lastSeen: new Date(),
-                        isOnline: true,
-                        connectionType: 'WIFI'
+                {
+                    $set: {
+                        status: "online"
                     }
-                }
+                },
+                { new: true }  // This returns the document after update
             );
+
+            // Device is registered, send authorization
+            await publishMessage(`${TOPICS.DEVICE_CREDENTIALS}`, hub);
 
             console.log(`Device ${macAddress} authorized and updated`);
         } else {
             // Device not registered
-            await publishMessage(`${TOPICS.DEVICE_CONTROL}${macAddress}`, {
-                status: 'UNAUTHORIZED',
-                message: 'Device not registered',
-                timestamp: new Date().toISOString()
-            });
-            console.warn(`Unauthorized device attempt: ${macAddress}`);
+            console.log(`Unauthorized device attempt: ${macAddress}`);
         }
     } catch (error) {
         console.error(`Error handling device status for ${macAddress}:`, error);
     }
 }
 
-// Handle device data messages
-async function handleDeviceData(macAddress, messageData) {
-    try {
-        const hub = await Hub_DB.findOne({ macAddress });
-        if (hub) {
-            // Process device data here
-            console.log(`Received data from ${macAddress}:`, messageData);
-        }
-    } catch (error) {
-        console.error(`Error handling device data for ${macAddress}:`, error);
-    }
-}
 
 // Initialize MQTT connection
 mqttClient.on("connect", async () => {
     try {
         console.log("✅ MQTT Broker Connected Successfully");
-        
-        // Subscribe to all device topics
-        await subscribeMessage(TOPICS.DEVICE_STATUS);
 
-        console.log("✅ All topic subscriptions completed");
+        await subscribeMessage('status');
+        await subscribeMessage('data');
+        await subscribeMessage('disconnect');
+
     } catch (error) {
         console.error('MQTT initialization error:', error);
     }
