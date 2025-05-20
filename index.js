@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 connectDB();
 // for MQTT connection
-require('./src/client/hive_MQTT_connection/mqtt_services');
+// require('./src/client/hive_MQTT_connection/mqtt_services');
 
 // 🔥 Auto Unlink Script Require Karo
 require('./src/client/node_cron_timer/node_cron_timer');
