@@ -38,7 +38,12 @@ const Use_Schema = new  mongoose.Schema({
            type : mongoose.Schema.Types.ObjectId,
            ref : 'User'
      }],
-    //   hubs : [{
+},{timestamps : true});
+
+module.exports = mongoose.model('User', Use_Schema);
+
+
+  //   hubs : [{
     //     type : mongoose.Schema.Types.ObjectId,
     //     ref : 'Hub'
     //  }]
@@ -46,6 +51,3 @@ const Use_Schema = new  mongoose.Schema({
     //     type : mongoose.Schema.Types.ObjectId,
     //     ref : 'MasterController'
     //  }]
-},{timestamps : true});
-
-module.exports = mongoose.model('User', Use_Schema);

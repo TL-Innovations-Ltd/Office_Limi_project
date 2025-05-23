@@ -14,12 +14,6 @@ cloudinary.config({
     api_secret: "ua-T1KruwcdPtoJoUPX8hztSJkU",
 });
 
-// const { Resend } = require('resend');
-
-// const resend = new Resend("re_8Qk5APrR_PCFiD93vLzBXJxhzs8oPsQbC");
-// Generate Random Username Function
-
-
 const generateUsername = () => {
     return "user_" + Math.random().toString(36).substring(2, 10);
 };
@@ -54,8 +48,6 @@ async function getIPAndRegion(req) {
     }
 }
 
-
-
 const uploadImage = async (imageBase64) => {
 
     // Ensure the base64 string includes the correct prefix (data URL)
@@ -71,6 +63,7 @@ const uploadImage = async (imageBase64) => {
         id: uploadResponse.public_id,
     };
 };
+
 
 module.exports = {
 

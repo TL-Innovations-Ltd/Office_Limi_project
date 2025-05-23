@@ -17,8 +17,8 @@ module.exports = {
             const result = await admin_device_service.add_master_controller_hub_device_service(req);
             res.status(200).json({success : true , data : result});
         } catch (error) {
-            // console.log(error);
-            res.status(500).json({ success : false , error_message : error.message});
+            console.log(error);
+            res.status(500).json({ success : false , error_message : JSON.stringify(error)});
         } 
     },
 

@@ -8,6 +8,16 @@ const HubSchema = new mongoose.Schema({
   macAddress: { type: String, unique: true, required: true },
   hubType: { type: Number,  default : 1},
   pwm : { type: mongoose.Schema.Types.ObjectId, ref: "PWM" },
+  thingsboard: {
+    deviceId: { 
+      type: String,
+      required: true
+    },
+    accessToken: { 
+      type: String,
+      required: true
+    }
+  },
   status : { type : String , default : "offline"},
 }, { timestamps: true });
 
