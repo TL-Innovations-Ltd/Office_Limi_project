@@ -63,7 +63,7 @@ module.exports = {
             const warm = convertWarm(hexData[2]);
             const brightness = convertBrightness(hexData[3]);
     
-            telemetryData = [{
+            telemetryData = {
                 ts: timestamp,
                 values: {
                     mode: "pwm",
@@ -72,7 +72,7 @@ module.exports = {
                     warm: warm,
                     brightness: brightness
                 }
-            }];
+            };
             await sendToThingBoard(device, telemetryData);
     
             const pwmSettings = new PWM_DB({
@@ -90,7 +90,7 @@ module.exports = {
             const green = hexData[2];
             const blue = hexData[3];
     
-            telemetryData = [{
+            telemetryData = {
                 ts: timestamp,
                 values: {
                     mode: "rgb",
@@ -99,7 +99,7 @@ module.exports = {
                     green: green,
                     blue: blue
                 }
-            }];
+            };
             await sendToThingBoard(device, telemetryData);
     
             const rgbSettings = new RGB_DB({
@@ -120,7 +120,7 @@ module.exports = {
                 const warm = convertWarm(hexData[2]);
                 const brightness = convertBrightness(hexData[3]);
     
-                telemetryData = [{
+                telemetryData = {
                     ts: timestamp,
                     values: {
                         mode: "pwm",
@@ -130,7 +130,7 @@ module.exports = {
                         warm: warm,
                         brightness: brightness
                     }
-                }];
+                };
                 await sendToThingBoard(device, telemetryData);
     
                 const miniPwmSettings = new PWM_DB({
@@ -149,7 +149,7 @@ module.exports = {
                 const green = hexData[3];
                 const blue = hexData[4];
     
-                telemetryData = [{
+                telemetryData = {
                     ts: timestamp,
                     values: {
                         mode: "rgb",
@@ -159,7 +159,7 @@ module.exports = {
                         green: green,
                         blue: blue
                     }
-                }];
+                };
                 await sendToThingBoard(device, telemetryData);
     
                 const miniRgbSettings = new RGB_DB({
