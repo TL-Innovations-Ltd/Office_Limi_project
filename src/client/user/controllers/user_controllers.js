@@ -1,4 +1,13 @@
 const user_service = require('../services/user_services');
+const { clearCache } = require('../../../utils/redisCache');
+
+// Clear cache for user-related data
+const clearUserCache = async (userId) => {
+    await clearCache('*customer_details*');
+    await clearCache('*user_tracking*');
+    await clearCache('*get_user_capture*');
+};
+
 module.exports = {
      
     send_otp :  async(req, res) => {
@@ -89,9 +98,9 @@ module.exports = {
     },
 
     customer_capture : async(req ,res) => {
-        try {
+        try {    
             const staff_details = await user_service.customer_capture_service(req);
-            console.log({success : true , data  : staff_details});
+    
             res.status(200).json({success  : true  , data : staff_details});
         } catch (e) {
              res.status(500).json({success  : false , error_message : e.message});
@@ -130,7 +139,8 @@ module.exports = {
     tracking_capture : async(req ,res) => {
          try{
             const tracking_data = await user_service.tracking_capture_service(req);
-
+            // Clear relevant caches
+            await clearUserCache();
             res.status(200).json({success : true , data  : tracking_data});
          }
          catch(e){

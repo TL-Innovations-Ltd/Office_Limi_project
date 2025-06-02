@@ -1,21 +1,47 @@
 // const MasterController_DB = require('../models/master-controller_device');
+const { v4: uuidv4 } = require('uuid');
 const Hub_DB = require('../models/hub-controller_device');
 const axios = require("axios");
+const redisClient = require('../../../config/redis');
+
+const THINGSBOARD_ADMIN_TOKEN_KEY = 'thingsboard:admin:token';
+const TOKEN_EXPIRY = 3600; // 1 hour in seconds
 
 async function getAdminToken() {
+    // Try to get token from cache first
+
+    const cachedToken = await redisClient.get(THINGSBOARD_ADMIN_TOKEN_KEY);
+    if (cachedToken && cachedToken.token) {
+        return JSON.parse(cachedToken);
+    }
+
+    // If not in cache, fetch new token
     const response = await axios.post('https://thingsboard.limilighting.com/api/auth/login', {
         username: "tenant@thingsboard.org",
         password: "tenant"
     });
     
-    return response.data; // contains token and refreshToken
+    // Cache the new token with 5 minutes less than expiry to ensure we refresh before it expires
+    if (response.data && response.data.token) {
+        await redisClient.set(
+            THINGSBOARD_ADMIN_TOKEN_KEY, 
+            JSON.stringify(response.data),
+            'EX',
+            TOKEN_EXPIRY - 300 // 55 minutes (5 minutes less than expiry)
+        );
+    }
+    
+    return response.data;
 }
 
 async function registerDeviceInThingsBoard(name, token) {
+    // Generate a unique name by appending a UUID
+    const uniqueName = `${name}-${uuidv4()}`;
+    
     const res = await axios.post(
         'https://thingsboard.limilighting.com/api/device',
         {
-            name,
+            name: uniqueName,
             type: 'light' // You can change this if needed
         },
         {
@@ -25,10 +51,11 @@ async function registerDeviceInThingsBoard(name, token) {
         }
     );
 
-    return res.data; // contains device ID
+    return res.data;
 }
 
 async function getDeviceAccessToken(deviceId, token) {
+    // No need to cache credentials as they are stored in MongoDB after first fetch
     const res = await axios.get(
         `https://thingsboard.limilighting.com/api/device/${deviceId}/credentials`,
         {
@@ -75,8 +102,20 @@ module.exports = {
             throw new Error("developer mode ignore")
         }
 
-        let existingDevice = await Hub_DB.findOne({ macAddress: id });
+        // Check if device already exists
+        const deviceCacheKey = `device:exists:${id}`;
+        
+        // Check cache first
+        const cachedDevice = await redisClient.get(deviceCacheKey);
+        if (cachedDevice === 'true') {
+            return { message: "Hub already registered", cached: cachedDevice };
+        }
+        
+        // If not in cache, check database
+        const existingDevice = await Hub_DB.findOne({ macAddress: id });
         if (existingDevice) {
+             // Cache the result for 1 hour
+             await redisClient.set(deviceCacheKey, 'true', 'EX', 3600);
             return { message: "Hub already registered" };
         }
 
