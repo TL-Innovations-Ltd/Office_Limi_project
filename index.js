@@ -36,6 +36,8 @@ app.use('/server', test_ping);
 app.use('/client/devices', device_routes);
 app.use('/admin', admin_device_routes);
 
+//suzair
+
 // Swagger documentation route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
 
