@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const user_controller = require('./controllers/user_controllers');
+const model3d_controller = require('./controllers/model3d_controller');
 const authClientmiddleware = require('../middleware/user_middleware');
 const { cache } = require('../../utils/redisCache');
+const { upload, uploadToCloudinary } = require('../../config/cloudinary');
 
 // Cache duration in seconds
 const FIVE_MINUTES = 5 * 60; // 5 minutes cache
@@ -37,5 +39,31 @@ router.post('/tracking_capture', user_controller.tracking_capture);
 router.get('/get_tracking_capture', cache(FIVE_MINUTES), user_controller.get_tracking_capture);
 router.get('/user_tracking/:customerId', cache(FIVE_MINUTES), user_controller.find_user_tracking);
 router.get('/get_user_capture', cache(FIVE_MINUTES), user_controller.get_user_capture);
+
+// 3D Model routes
+router.post(
+  '/3d-models',
+  authClientmiddleware,
+  upload.single('file'),
+  model3d_controller.uploadModel
+);  // checked
+
+router.get(
+  '/3d-models',
+  authClientmiddleware,
+  model3d_controller.getUserModels
+);
+
+// Add a new route for downloading 3D models
+router.get(
+  '/3d-models/download/:id',
+  model3d_controller.downloadModel
+);
+
+router.delete(
+  '/3d-models/:id',
+  authClientmiddleware,
+  model3d_controller.deleteModel
+);
 
 module.exports = router;

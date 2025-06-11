@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Light Control System API Backend (Suzair)',
+      title: 'Light Control App Backend (Suzair)',
       version: '1.0.0',
-      description: 'API documentation for the Light Control System',
+      description: 'API documentation for the Light Control App',
       contact: {
         name: 'API Support',
         email: 'support@limilighting.com'
@@ -43,6 +43,7 @@ const options = {
   },
   apis: [
     './src/client/user/docs/swagger.js',  // User module documentation
+    './src/client/user/docs/3d_models.swagger.js',
     './src/client/devices/docs/swagger.js',
     './src/admin/devices/docs/swagger.js',
   ],
