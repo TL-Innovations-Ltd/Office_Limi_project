@@ -62,7 +62,6 @@ router.get(
 
 router.delete(
   '/3d-models/:id',
-  authClientmiddleware,
   model3d_controller.deleteModel
 );
 
