@@ -131,8 +131,8 @@ exports.downloadModel = async (req, res) => {
 exports.deleteModel = async (req, res) => {
   try {
     const { id } = req.params;
+ 
     const model = await Model3D.findById(id);
-
     if (!model) {
       return res.status(404).json({
         success: false,
@@ -140,13 +140,13 @@ exports.deleteModel = async (req, res) => {
       });
     }
 
-    // Check ownership
-    if (model.userId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this model'
-      });
-    }
+    // // Check ownership
+    // if (model.userId.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: 'Not authorized to delete this model'
+    //   });
+    // }
 
     // Delete file
     if (fs.existsSync(model.path)) {
