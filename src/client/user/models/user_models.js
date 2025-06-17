@@ -5,6 +5,16 @@ const Use_Schema = new  mongoose.Schema({
          type  : String,
          require : true,
      },
+     profilePicture: {
+        url: {
+            type: String,
+            default: ''
+        },
+        public_id: {
+            type: String,
+            default: ''
+        }
+     }, 
      email :  {
          type  : String,
          unique : true,

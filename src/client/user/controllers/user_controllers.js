@@ -1,4 +1,5 @@
 const user_service = require('../services/user_services');
+const { uploadProfilePicture, deleteFromCloudinary } = require('../../../config/cloudinary');
 const { clearCache } = require('../../../utils/redisCache');
 
 // Clear cache for user-related data
@@ -86,15 +87,80 @@ module.exports = {
         }
     },
 
-    update_name : async(req , res) => {
-         try{
-            const update_user = await user_service.update_user_service(req);
-            res.status(200).json({success  : true , message : "Username Updated" , data : update_user});
-         }
-         catch(e){
-            //  console.log(e);
-             res.status(500).json({success  : false , error_message : e.message});
-         }
+    update_profile: async (req, res) => {
+        try {
+            const userId = req.user._id; // Get user ID from the authenticated token
+            const { username } = req.body;
+            const file = req.file;
+           
+            let updateData = {};
+            let oldPublicId = null;
+            
+            // Get the current user to check for existing profile picture
+            const currentUser = await user_service.getUserById(userId);
+            
+            // If user has an existing profile picture, store the public_id for deletion
+            if (currentUser.profilePicture?.public_id) {
+                oldPublicId = currentUser.profilePicture.public_id;
+            }
+            
+            // Handle profile picture upload if file exists
+            if (file) {
+                try {
+
+                     // Delete old profile picture if it exists
+                     if (oldPublicId) {
+                        try {
+                            await deleteFromCloudinary(oldPublicId);
+                        } catch (deleteError) {
+                            console.error('Error deleting old profile picture:', deleteError);
+                            // Continue even if deletion fails
+                        }
+                    }
+
+                    // Upload new profile picture
+                    const result = await uploadProfilePicture(file.buffer);
+                    updateData.profilePicture = {
+                        url: result.secure_url,
+                        public_id: result.public_id
+                    };
+                    
+                } catch (uploadError) {
+                    console.error('Error uploading to Cloudinary:', uploadError);
+                    return res.status(500).json({
+                        success: false,
+                        error_message: 'Failed to upload profile picture'
+                    });
+                }
+            }
+            
+            // Add username to update if provided
+            if (username) {
+                updateData.username = username;
+            }
+            
+            // If there's nothing to update, return error
+            if (Object.keys(updateData).length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    error_message: 'No data provided for update' 
+                });
+            }
+            
+            // Update the user
+            const updatedUser = await user_service.updateUserService(userId, updateData);
+            
+            res.status(200).json({ 
+                success: true, 
+                message: updatedUser,
+            });
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            res.status(500).json({ 
+                success: false, 
+                error_message: error.message 
+            });
+        }
     },
 
     customer_capture : async(req ,res) => {
@@ -148,6 +214,19 @@ module.exports = {
          }
     },
 
+    send_user_controller :  async (req, res) => {
+         try{
+             
+            const send_data =   await  user_service.send_user_data_service(req);
+            res.status(200).json({success : true , data  : send_data});
+         }
+         catch(e){
+             res.status(500).json({success : false , error_message : e.message});
+         }
+    },
+
+
+
     get_tracking_capture : async(req , res) => {
          try{
             const tracking_data = await user_service.get_tracking_capture_service(req);
@@ -172,6 +251,17 @@ module.exports = {
           try{
             const user_capture = await user_service.get_user_capture_service(req);
             res.status(200).json({success : true , data  : user_capture});
+         }
+         catch(e){
+             res.status(500).json({success : false , error_message : e.message});
+         }
+    },
+
+    send_user_controller :  async (req, res) => {
+         try{
+             
+            const send_data =   await  user_service.send_user_data_service(req);
+            res.status(200).json({success : true , data  : send_data});
          }
          catch(e){
              res.status(500).json({success : false , error_message : e.message});

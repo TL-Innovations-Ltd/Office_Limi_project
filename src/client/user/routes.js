@@ -4,7 +4,7 @@ const user_controller = require('./controllers/user_controllers');
 const model3d_controller = require('./controllers/model3d_controller');
 const authClientmiddleware = require('../middleware/user_middleware');
 const { cache } = require('../../utils/redisCache');
-const { upload, uploadToCloudinary } = require('../../config/cloudinary');
+const { upload, uploadToCloudinary, profilePictureUpload, uploadProfilePicture } = require('../../config/cloudinary');
 
 // Cache duration in seconds
 const FIVE_MINUTES = 5 * 60; // 5 minutes cache
@@ -19,9 +19,15 @@ router.post('/send_otp', user_controller.send_otp);
 router.post('/verify_otp', user_controller.check_otp);
 router.post('/verify_production', user_controller.verify_production_user);
 router.post('/installer_user', user_controller.installer_user);
+router.get('/send_user_data' , authClientmiddleware ,  user_controller.send_user_controller)
 
 // User management routes
-router.patch('/update_name/:id', user_controller.update_name);
+router.patch('/update_profile', 
+    authClientmiddleware, 
+    profilePictureUpload.single('profilePicture'), 
+    user_controller.update_profile
+);
+
 router.post('/add_family_member', authClientmiddleware, user_controller.add_family_member);
 router.post('/add_production_user', user_controller.add_production_user);
 router.patch('/update_production_user/:id', user_controller.update_production_user);

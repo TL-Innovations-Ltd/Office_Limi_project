@@ -7,11 +7,14 @@ const { nanoid } = require('nanoid');
 const Customer_DB = require('../models/customer_capture_model');
 const UserTracking = require('../models/user_tracking_capture');
 const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+const path = require('path');
 
+// Configure Cloudinary
 cloudinary.config({
-    cloud_name: "drwoekliw",
-    api_key: "253749524177665",
-    api_secret: "ua-T1KruwcdPtoJoUPX8hztSJkU",
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "drwoekliw",
+    api_key: process.env.CLOUDINARY_API_KEY || "253749524177665",
+    api_secret: process.env.CLOUDINARY_API_SECRET || "ua-T1KruwcdPtoJoUPX8hztSJkU",
 });
 
 const generateUsername = () => {
@@ -64,6 +67,15 @@ const uploadImage = async (imageBase64) => {
     };
 };
 
+
+const getUserById = async (userId) => {
+    try {
+        return await UserDB.findById(userId).select('-password -otp -otp_expire_at');
+    } catch (error) {
+        console.error('Error fetching user by ID:', error);
+        throw error;
+    }
+};
 
 module.exports = {
 
@@ -310,18 +322,38 @@ module.exports = {
         return newFamilyMember;
     },
 
-    update_user_service: async (req) => {
-        const { id } = req.params;
-        const { user_name } = req.body;
-        if (!id || !user_name) {
-            throw new Error('Missing user_id or user_name');
+    updateUserService: async (userId, updateData) => {
+        try {
+            // Find the user first to handle profile picture cleanup if needed
+            const user = await UserDB.findById(userId);
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            // If there's a new profile picture and an old one exists, delete the old one from Cloudinary
+            if (updateData.profilePicture && user.profilePicture?.public_id) {
+                try {
+                    await cloudinary.uploader.destroy(user.profilePicture.public_id);
+                } catch (error) {
+                    console.error('Error deleting old profile picture:', error);
+                    // Continue even if deletion fails
+                }
+            }
+
+            // Update the user with new data
+            await UserDB.findByIdAndUpdate(
+                userId,
+                { $set: updateData },
+                { new: true, runValidators: true }
+            );
+            
+            return 'Profile updated successfully';
+        } catch (error) {
+            console.error('Error in updateUserService:', error);
+            throw error;
         }
-        const user = await UserDB.findByIdAndUpdate({ _id: id }, { username: user_name }, { new: true });
-        if (!user) {
-            throw new Error('User not found');
-        }
-        return user;
     },
+
 
     customer_capture_service: async (req) => {
         const {
@@ -474,5 +506,80 @@ module.exports = {
     get_user_capture_service: async (req) => {
         const userCaptureData = await UserDB.find({});
         return userCaptureData;
+    },
+
+    send_user_data_service : async (req) => {
+        return req.user;
+    },
+
+    uploadToCloudinary: async (filePath) => {
+        try {
+            // Upload the file to Cloudinary
+            const result = await cloudinary.uploader.upload(filePath, {
+                folder: 'profile_pictures',
+                resource_type: 'auto',
+                quality: 'auto:good',
+                fetch_format: 'auto'
+            });
+            
+            // Delete the temporary file
+            fs.unlinkSync(filePath);
+            
+            return result;
+        } catch (error) {
+            // Make sure to clean up the temp file if upload fails
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+            throw new Error(`Cloudinary upload failed: ${error.message}`);
+        }
+    },
+    
+    updateUserProfilePicture: async (userId, pictureData) => {
+        try {
+            // First get the user to check if they have an existing profile picture
+            const user = await UserDB.findById(userId);
+            
+            if (!user) {
+                throw new Error('User not found');
+            }
+            
+            // If there's an existing profile picture, delete it from Cloudinary
+            if (user.profilePicture && user.profilePicture.public_id) {
+                try {
+                    await cloudinary.uploader.destroy(user.profilePicture.public_id);
+                } catch (error) {
+                    console.error('Error deleting old profile picture:', error);
+                    // Continue even if deletion fails
+                }
+            }
+            
+            // Update the user's profile picture
+            user.profilePicture = {
+                url: pictureData.url,
+                public_id: pictureData.public_id
+            };
+            
+            await user.save();
+            
+            // Return the updated user without sensitive data
+            user.password = undefined;
+            user.otp = undefined;
+            user.otp_expire_at = undefined;
+            
+            return 'Profile picture updated successfully';
+        } catch (error) {
+            console.error('Error updating profile picture:', error);
+            throw error;
+        }
+    },
+    
+    getUserById: async (userId) => {
+        try {
+            return await UserDB.findById(userId).select('-password -otp -otp_expire_at');
+        } catch (error) {
+            console.error('Error fetching user by ID:', error);
+            throw error;
+        }
     }
 };

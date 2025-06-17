@@ -12,6 +12,8 @@ cloudinary.config({
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
+
+// For 3D model uploads
 const upload = multer({
   storage: storage,
   limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB
@@ -23,6 +25,22 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Invalid file type. Only USDZ files are allowed.'), false);
+    }
+  }
+});
+
+// For profile picture uploads
+const profilePictureUpload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    const fileExt = file.originalname.split('.').pop().toLowerCase();
+    
+    if (allowedTypes.includes(file.mimetype) && ['jpeg', 'jpg', 'png', 'gif'].includes(fileExt)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPG, PNG, or GIF images are allowed.'), false);
     }
   }
 });
@@ -49,4 +67,46 @@ const uploadToCloudinary = (buffer, originalname) => {
   });
 };
 
-module.exports = { cloudinary, upload, uploadToCloudinary };
+// Function to upload profile picture to Cloudinary
+const uploadProfilePicture = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const public_id = `profile-pictures/${uuidv4()}`;
+    
+    cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'image',
+        public_id: public_id,
+        folder: 'profile-pictures',
+        transformation: [
+          { width: 200, height: 200, gravity: 'face', crop: 'thumb' },
+          { quality: 'auto:good' }
+        ]
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    ).end(buffer);
+  });
+};
+
+// Function to delete a file from Cloudinary
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.error('Error deleting from Cloudinary:', error);
+    throw error;
+  }
+};
+
+// Export all functions
+module.exports = {
+    cloudinary,
+    upload,
+    uploadToCloudinary, 
+    profilePictureUpload,
+    uploadProfilePicture,
+    deleteFromCloudinary
+};
