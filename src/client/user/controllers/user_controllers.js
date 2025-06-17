@@ -92,7 +92,8 @@ module.exports = {
             const userId = req.user._id; // Get user ID from the authenticated token
             const { username } = req.body;
             const file = req.file;
-           
+             console.log(req.file);
+             console.log(req.body);
             let updateData = {};
             let oldPublicId = null;
             

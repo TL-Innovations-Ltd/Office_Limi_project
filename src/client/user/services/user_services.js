@@ -176,13 +176,21 @@ module.exports = {
             throw new Error("OTP expired");
         }
 
-        // Generate random username
-        const username = generateUsername();
+        // Prepare update object
+        const updateData = {
+            otp: null,
+            otp_expire_at: null
+        };
+
+        // Only generate and set username if it doesn't exist or is still the default pattern
+        if (!user.username || user.username.startsWith('user_')) {
+            updateData.username = generateUsername();
+        }
 
         // Update user (clear OTP, set username)
         const user_data = await UserDB.findOneAndUpdate(
             { email },
-            { otp: null, otp_expire_at: null, username: username },
+            updateData,
             { new: true } // Yeh updated document return karega
         );
 
