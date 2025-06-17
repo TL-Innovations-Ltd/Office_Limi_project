@@ -214,19 +214,6 @@ module.exports = {
          }
     },
 
-    send_user_controller :  async (req, res) => {
-         try{
-             
-            const send_data =   await  user_service.send_user_data_service(req);
-            res.status(200).json({success : true , data  : send_data});
-         }
-         catch(e){
-             res.status(500).json({success : false , error_message : e.message});
-         }
-    },
-
-
-
     get_tracking_capture : async(req , res) => {
          try{
             const tracking_data = await user_service.get_tracking_capture_service(req);
@@ -257,14 +244,23 @@ module.exports = {
          }
     },
 
-    send_user_controller :  async (req, res) => {
-         try{
-             
-            const send_data =   await  user_service.send_user_data_service(req);
-            res.status(200).json({success : true , data  : send_data});
-         }
-         catch(e){
-             res.status(500).json({success : false , error_message : e.message});
-         }
+    send_user_controller: async (req, res) => {
+        try {
+            const userData = await user_service.send_user_data_service(req);
+            // Extract only the required fields
+            const responseData = {
+                username: userData.username,
+                profilePicture: userData.profilePicture || null
+            };
+            res.status(200).json({ 
+                success: true, 
+                data: responseData 
+            });
+        } catch (e) {
+            res.status(500).json({ 
+                success: false, 
+                error_message: e.message 
+            });
+        }
     }
 }
