@@ -9,6 +9,7 @@ const UserTracking = require('../models/user_tracking_capture');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -67,7 +68,6 @@ const uploadImage = async (imageBase64) => {
     };
 };
 
-
 const getUserById = async (userId) => {
     try {
         return await UserDB.findById(userId).select('-password -otp -otp_expire_at');
@@ -80,15 +80,33 @@ const getUserById = async (userId) => {
 module.exports = {
 
     send_otp_service: async (req) => {
-        const { email } = req.body;
+        const { email, isWebsiteSignup = false, username, password } = req.body;
 
         if (!isValidEmail(email) || !email) {
             throw new Error("Invalid email format");
         }
 
         const { ip, region } = await getIPAndRegion(req);
-        //    console.log(ip , region);
         const findEmail = await UserDB.findOne({ email: email });
+
+        // If it's a website signup
+        if (isWebsiteSignup) {
+            if (findEmail) {
+                throw new Error("User already exists");
+            }
+            if (!username || !password) {
+                throw new Error("Name and password are required for website signup");
+            }
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await UserDB.create({
+                email,
+                username: username,
+                password: hashedPassword,
+                ip,
+                region,
+            });
+            return "User created successfully"
+        }
 
         const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // <-- 15 min expiry
         const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
@@ -159,49 +177,66 @@ module.exports = {
     },
 
     check_otp_service: async (req) => {
-        const { email, otp } = req.body;
-        if (!email || !otp) {
-            throw new Error('Missing email or otp');
+        const { email, otp, password, isWebsiteLogin = false } = req.body;
+
+        if (!email) {
+            throw new Error('Email is required');
         }
+
         const user = await UserDB.findOne({ email });
         if (!user) {
             throw new Error('User not found');
         }
 
-        if (user.otp !== otp) {
-            throw new Error("Invalid OTP");
+        // Website login flow
+        if (isWebsiteLogin) {
+            if (!password) {
+                throw new Error('Password is required for website login');
+            }
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                throw new Error('Invalid credentials');
+            }
         }
+        // App OTP flow
+        else {
+            if (!otp) {
+                throw new Error('OTP is required for app login');
+            }
+            if (user.otp !== otp) {
+                throw new Error("Invalid OTP");
+            }
+            if (new Date() > user.otp_expire_at) {
+                throw new Error("OTP expired");
+            }
 
-        if (new Date() > user.otp_expire_at) {
-            throw new Error("OTP expired");
+            // Common updates for both flows
+            const updateData = {
+                otp: null,
+                otp_expire_at: null
+            };
+
+            // Only set username if it doesn't exist
+            if (!user.username || user.username.startsWith('user_')) {
+                updateData.username = generateUsername();
+            }
+
+            // Update user
+            await UserDB.findOneAndUpdate(
+                { email },
+                updateData,
+                { new: true }
+            );
         }
-
-        // Prepare update object
-        const updateData = {
-            otp: null,
-            otp_expire_at: null
-        };
-
-        // Only generate and set username if it doesn't exist or is still the default pattern
-        if (!user.username || user.username.startsWith('user_')) {
-            updateData.username = generateUsername();
-        }
-
-        // Update user (clear OTP, set username)
-        const user_data = await UserDB.findOneAndUpdate(
-            { email },
-            updateData,
-            { new: true } // Yeh updated document return karega
-        );
 
         // Generate JWT token
         const token = jwt.sign(
             { id: user._id },
             process.env.SECRET_KEY,
-            { expiresIn: "7d" } // Token expires in 7 days
+            { expiresIn: "7d" }
         );
 
-        return { data: user_data, token: token };
+        return { token };
     },
 
     installer_user_service: async () => {
@@ -354,7 +389,7 @@ module.exports = {
                 { $set: updateData },
                 { new: true, runValidators: true }
             );
-            
+
             return 'Profile updated successfully';
         } catch (error) {
             console.error('Error in updateUserService:', error);
@@ -381,7 +416,7 @@ module.exports = {
         }
 
         let images = {};
-        
+
         // Only attempt image upload if images are provided
         if (frontCardImage) {
             const frontCardImageUrl = await uploadImage(frontCardImage);
@@ -430,25 +465,25 @@ module.exports = {
         if (!profileId) {
             throw new Error('Profile ID is required');
         }
-        
+
         // Use findOneAndDelete directly which returns the deleted document
         const customer = await Customer_DB.findOneAndDelete({ _id: profileId });
-        
+
         if (!customer) {
             throw new Error('Customer not found');
         }
-        
+
         // If there are images associated with the customer, delete them from Cloudinary
         if (customer.images) {
             if (customer.images.frontCardImage && customer.images.frontCardImage.id) {
                 await cloudinary.uploader.destroy(customer.images.frontCardImage.id);
             }
-            
+
             if (customer.images.backCardImage && customer.images.backCardImage.id) {
                 await cloudinary.uploader.destroy(customer.images.backCardImage.id);
             }
         }
-        
+
         return true;
     },
 
@@ -516,7 +551,7 @@ module.exports = {
         return userCaptureData;
     },
 
-    send_user_data_service : async (req) => {
+    send_user_data_service: async (req) => {
         return req.user;
     },
 
@@ -529,10 +564,10 @@ module.exports = {
                 quality: 'auto:good',
                 fetch_format: 'auto'
             });
-            
+
             // Delete the temporary file
             fs.unlinkSync(filePath);
-            
+
             return result;
         } catch (error) {
             // Make sure to clean up the temp file if upload fails
@@ -542,16 +577,16 @@ module.exports = {
             throw new Error(`Cloudinary upload failed: ${error.message}`);
         }
     },
-    
+
     updateUserProfilePicture: async (userId, pictureData) => {
         try {
             // First get the user to check if they have an existing profile picture
             const user = await UserDB.findById(userId);
-            
+
             if (!user) {
                 throw new Error('User not found');
             }
-            
+
             // If there's an existing profile picture, delete it from Cloudinary
             if (user.profilePicture && user.profilePicture.public_id) {
                 try {
@@ -561,27 +596,27 @@ module.exports = {
                     // Continue even if deletion fails
                 }
             }
-            
+
             // Update the user's profile picture
             user.profilePicture = {
                 url: pictureData.url,
                 public_id: pictureData.public_id
             };
-            
+
             await user.save();
-            
+
             // Return the updated user without sensitive data
             user.password = undefined;
             user.otp = undefined;
             user.otp_expire_at = undefined;
-            
+
             return 'Profile picture updated successfully';
         } catch (error) {
             console.error('Error updating profile picture:', error);
             throw error;
         }
     },
-    
+
     getUserById: async (userId) => {
         try {
             return await UserDB.findById(userId).select('-password -otp -otp_expire_at');
