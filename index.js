@@ -3,6 +3,8 @@ const envPath = process.env.NODE_ENV === 'development' ? '.env.dev' : '.env';
 console.log(`🔧 Loading environment from: ${envPath} `);
 require('dotenv').config({ path: envPath });
 
+// May Dev Testing kr rh hn 
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/connection/DB_connection');
@@ -40,7 +42,7 @@ app.use('/server', test_ping);
 app.use('/client/devices', device_routes);
 app.use('/admin', admin_device_routes);
 
-//suzair testing changes for 3d mdeol
+
 
 // Swagger documentation route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
