@@ -1,4 +1,8 @@
 // Developer: Suzair - Backend Developer
+const envPath = process.env.NODE_ENV === 'development' ? '.env.dev' : '.env';
+console.log(`🔧 Loading environment from: ${envPath} `);
+require('dotenv').config({ path: envPath });
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/connection/DB_connection');
@@ -23,7 +27,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 connectDB();
 
 // For Redis connection
-require('./src/config/redis'); 
+require('./src/config/redis');
 
 // for MQTT connection
 require('./src/client/hive_MQTT_connection/mqtt_services');

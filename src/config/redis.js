@@ -1,11 +1,11 @@
 // src/config/redis.js
 const Redis = require('ioredis');
-require('dotenv').config();
 
 // Create Redis client
 const redisClient = new Redis({
     host: process.env.REDIS_HOST, // Default to localhost
     port: process.env.REDIS_PORT,         // Default Redis port
+    db: process.env.REDIS_DB,
     retryStrategy: (times) => {
         // Reconnect after
         const delay = Math.min(times * 50, 2000);
