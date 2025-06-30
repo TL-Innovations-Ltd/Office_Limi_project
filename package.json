@@ -4,10 +4,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=development nodemon ./index.js",
-    "start": "cross-env NODE_ENV=production node ./index.js",
+    "dev": "nodemon ./index.js",
+    "start": " node ./index.js",
     "swagger": "node ./src/config/swagger.js",
-    "pro": "cross-env NODE_ENV=production node ./cluster-server.js"
+    "pro": " node ./cluster-server.js"
   },
   "keywords": [],
   "author": "",
