@@ -12,7 +12,7 @@ function getCurrentBranch() {
 }
 
 const envPath = getCurrentBranch() === 'dev' ? '.env.dev' : '.env';
-console.log(`🔧 Loading environment from: ${envPath} `);
+console.log(`🔧 Loading environment from: ${envPath === '.env.dev' ? 'development' : 'production'} `);
 require('dotenv').config({ path: envPath });
 
 // May Dev Testing kr rh hn 
