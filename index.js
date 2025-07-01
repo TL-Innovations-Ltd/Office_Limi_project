@@ -46,7 +46,7 @@ require('./src/config/redis');
 // for MQTT connection
 require('./src/client/hive_MQTT_connection/mqtt_services');
 
-// 🔥 Auto Unlink Script 
+// 🔥 Auto Delete Installer User After 24 Hours 
 require('./src/client/node_cron_timer/node_cron_timer');
 
 app.use('/client', user_routes);
