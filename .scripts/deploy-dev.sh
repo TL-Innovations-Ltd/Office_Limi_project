@@ -20,4 +20,4 @@ npm install
 
 # Restart dev app using PM2
 echo "Restarting dev app with PM2..."
-pm2 restart limi_backend_dev --update-env
+pm2 restart limi_backend_dev
