@@ -15,7 +15,7 @@ const envPath = getCurrentBranch() === 'dev' ? '.env.dev' : '.env';
 console.log(`🔧 Loading environment from: ${envPath === '.env.dev' ? 'development' : 'production'} `);
 require('dotenv').config({ path: envPath });
 
-// Dev Only
+// Dev Only Branch
 
 const express = require('express');
 const cors = require('cors');
