@@ -185,7 +185,7 @@ module.exports = {
 
         const user = await UserDB.findOne({ email });
         if (!user) {
-            throw new Error('User not found');
+            throw new Error('Incorrect Email Please Try Again');
         }
 
         // Website login flow
@@ -195,7 +195,7 @@ module.exports = {
             }
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
-                throw new Error('Invalid credentials');
+                throw new Error('Incorrect Password Please Try Again');
             }
         }
         // App OTP flow
