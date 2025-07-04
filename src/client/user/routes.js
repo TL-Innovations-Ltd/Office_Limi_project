@@ -19,7 +19,7 @@ router.post('/send_otp', user_controller.send_otp);
 router.post('/verify_otp', user_controller.check_otp);
 router.post('/verify_production', user_controller.verify_production_user);
 router.post('/installer_user', user_controller.installer_user);
-router.get('/send_user_data' , authClientmiddleware ,  user_controller.send_user_controller)
+router.get('/send_user_data' , authClientmiddleware , cache(FIVE_MINUTES , 'profile') ,  user_controller.send_user_controller)
 
 // User management routes
 router.patch('/update_profile', 
@@ -37,14 +37,14 @@ router.post('/customer_capture', user_controller.customer_capture);
 router.delete('/customer_capture/:profileId', user_controller.delete_customer_capture);
 
 // Cached routes (read-heavy endpoints)
-router.get('/get_customer_details/:profileId', cache(FIVE_MINUTES), user_controller.get_customer_details);
-router.get('/get_customer_details', cache(FIVE_MINUTES), user_controller.get_customer_all_details);
+router.get('/get_customer_details/:profileId', cache(FIVE_MINUTES, 'NFC_Scan'), user_controller.get_customer_details);
+router.get('/get_customer_details', cache(FIVE_MINUTES, 'NFC_Scan'), user_controller.get_customer_all_details);
 
 // Tracking routes
 router.post('/tracking_capture', user_controller.tracking_capture);
-router.get('/get_tracking_capture', cache(FIVE_MINUTES), user_controller.get_tracking_capture);
-router.get('/user_tracking/:customerId', cache(FIVE_MINUTES), user_controller.find_user_tracking);
-router.get('/get_user_capture', cache(FIVE_MINUTES), user_controller.get_user_capture);
+router.get('/get_tracking_capture', cache(FIVE_MINUTES, 'User_Website_Tracking'), user_controller.get_tracking_capture);
+router.get('/user_tracking/:customerId', cache(FIVE_MINUTES, 'User_Website_Tracking'), user_controller.find_user_tracking);
+router.get('/get_user_capture', cache(FIVE_MINUTES, 'User_Website_Tracking'), user_controller.get_user_capture);
 
 // 3D Model routes
 router.post(

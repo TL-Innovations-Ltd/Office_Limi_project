@@ -1,11 +1,12 @@
 const redisClient = require('../config/redis');
 
 // Cache middleware function
-const cache = (duration) => {
+const cache = (duration , category = 'default')  => {
     return async (req, res, next) => {
         try {
             const userId = req.user?.id || 'guest';
-            const key = `cache:${userId}:${req.originalUrl || req.url}`;
+            const path = (req.originalUrl || req.url).split('?')[0]; // Remove query params
+            const key = `cache:${category}:${userId}:${path}`;
             
             // Try to get cached data
             const cachedData = await redisClient.get(key);
@@ -33,9 +34,9 @@ const cache = (duration) => {
 };
 
 // Function to clear cache by pattern
-const clearCache = async ( userId = 'guest' , pattern) => {
+const clearCache = async (category = 'default' ,  userId = 'guest') => {
     try {
-        const keys = await redisClient.keys(`cache:${userId}:${pattern}/*`);
+        const keys = await redisClient.keys(`cache:${category}:${userId}:/*`);
         if (keys.length > 0) {
             await redisClient.del(keys);
         }

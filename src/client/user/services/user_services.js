@@ -10,6 +10,7 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const { clearCache } = require('../../../utils/redisCache');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -389,6 +390,8 @@ module.exports = {
                 { $set: updateData },
                 { new: true, runValidators: true }
             );
+
+            clearCache( 'profile' , userId);
 
             return 'Profile updated successfully';
         } catch (error) {
