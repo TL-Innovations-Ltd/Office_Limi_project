@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Model3D = require('../models/model3d_model');
 const { v4: uuidv4 } = require('uuid');
+const WebConfigurator = require('../models/web_configurator');
 
 // Ensure upload directory exists
 const uploadDir = path.join(process.cwd(), '3d-models');
@@ -168,3 +169,107 @@ exports.deleteModel = async (req, res) => {
     });
   }
 };
+
+
+exports.webConfiguratoruplodaModel = async (req, res) => {
+     
+  if (!req.file) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'No file provided' 
+    });
+  }
+
+  try {
+    const fileExtension = path.extname(req.file.originalname);
+    const uniqueFilename = `${uuidv4()}${fileExtension}`;
+    const filePath = path.join(uploadDir, uniqueFilename);
+    
+    // Move the file to the upload directory
+    await fs.promises.writeFile(filePath, req.file.buffer);
+    
+    // Create model data
+    const modelData = {
+      filename: req.file.originalname,
+      path: filePath,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    };
+
+    const savedModel = await WebConfigurator.create(modelData);
+    
+    // Return relative path for client
+    const responseModel = savedModel.toObject();
+    responseModel.download_Id = savedModel._id  ;
+    
+    return res.status(201).json({
+      success: true,
+      data: responseModel
+    });
+
+  } catch (error) {
+    console.error('Error uploading 3D model:', error);
+    
+    // Cleanup on error
+    if (req.file) {
+      try {
+        const filePath = path.join(uploadDir, req.file.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (cleanupError) {
+        console.error('Error cleaning up file:', cleanupError);
+      }
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to process 3D model',
+      error: error.message
+    });
+  }
+
+};
+
+exports.webConfiguratordownloadModel =  async (req, res) => {
+   
+  try {
+    const { id } = req.params;
+    const model = await WebConfigurator.findById(id);
+
+    if (!model) {
+      return res.status(404).json({
+        success: false,
+        message: '3D model not found'
+      });
+    }
+
+    // Check if file exists
+    if (!fs.existsSync(model.path)) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found on server'
+      });
+    }
+
+    // Set headers for file download
+    res.download(model.path, model.filename, (err) => {
+      if (err) {
+        console.error('Error downloading file:', err);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            message: 'Error downloading file'
+          });
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error in downloadModel:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+
+}

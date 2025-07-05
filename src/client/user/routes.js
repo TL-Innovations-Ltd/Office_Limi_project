@@ -54,6 +54,12 @@ router.post(
   model3d_controller.uploadModel
 );  // checked
 
+router.post(
+  '/3d-models/web-configurator',
+  upload.single('file'),
+  model3d_controller.webConfiguratoruplodaModel
+);  // 3d  Team Web Configurator
+
 router.get(
   '/3d-models',
   authClientmiddleware,
@@ -66,9 +72,16 @@ router.get(
   model3d_controller.downloadModel
 );
 
+router.get(
+  '/3d-models/web-configurator/download/:id',
+  model3d_controller.webConfiguratordownloadModel
+);
+
 router.delete(
   '/3d-models/:id',
   model3d_controller.deleteModel
 );
+
+
 
 module.exports = router;
