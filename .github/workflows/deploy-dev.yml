@@ -21,4 +21,5 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd /var/www/office-limi-dev
+            chmod +x .scripts/deploy-dev.sh
             ./.scripts/deploy-dev.sh
