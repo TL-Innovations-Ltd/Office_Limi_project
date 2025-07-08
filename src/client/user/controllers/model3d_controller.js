@@ -12,9 +12,9 @@ if (!fs.existsSync(uploadDir)) {
 
 exports.uploadModel = async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'No file uploaded' 
+    return res.status(400).json({
+      success: false,
+      message: 'No file uploaded'
     });
   }
 
@@ -22,10 +22,10 @@ exports.uploadModel = async (req, res) => {
     const fileExtension = path.extname(req.file.originalname);
     const uniqueFilename = `${uuidv4()}${fileExtension}`;
     const filePath = path.join(uploadDir, uniqueFilename);
-    
+
     // Move the file to the upload directory
     await fs.promises.writeFile(filePath, req.file.buffer);
-    
+
     // Create model data
     const modelData = {
       userId: req.user._id,
@@ -37,11 +37,11 @@ exports.uploadModel = async (req, res) => {
     };
 
     const savedModel = await Model3D.create(modelData);
-    
+
     // Return relative path for client
     const responseModel = savedModel.toObject();
     responseModel.downloadUrl = `/3d-models/download/${savedModel._id}`;
-    
+
     return res.status(201).json({
       success: true,
       data: responseModel
@@ -49,7 +49,7 @@ exports.uploadModel = async (req, res) => {
 
   } catch (error) {
     console.error('Error uploading 3D model:', error);
-    
+
     // Cleanup on error
     if (req.file) {
       try {
@@ -132,7 +132,7 @@ exports.downloadModel = async (req, res) => {
 exports.deleteModel = async (req, res) => {
   try {
     const { id } = req.params;
- 
+
     const model = await Model3D.findById(id);
     if (!model) {
       return res.status(404).json({
@@ -172,11 +172,11 @@ exports.deleteModel = async (req, res) => {
 
 
 exports.webConfiguratoruplodaModel = async (req, res) => {
-     
+
   if (!req.file) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'No file provided' 
+    return res.status(400).json({
+      success: false,
+      message: 'No file provided'
     });
   }
 
@@ -184,10 +184,10 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
     const fileExtension = path.extname(req.file.originalname);
     const uniqueFilename = `${uuidv4()}${fileExtension}`;
     const filePath = path.join(uploadDir, uniqueFilename);
-    
+
     // Move the file to the upload directory
     await fs.promises.writeFile(filePath, req.file.buffer);
-    
+
     // Create model data
     const modelData = {
       filename: req.file.originalname,
@@ -197,11 +197,11 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
     };
 
     const savedModel = await WebConfigurator.create(modelData);
-    
+
     // Return relative path for client
     const responseModel = savedModel.toObject();
-    responseModel.download_Id = savedModel._id  ;
-    
+    responseModel.download_Id = savedModel._id;
+
     return res.status(201).json({
       success: true,
       data: responseModel
@@ -209,7 +209,7 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
 
   } catch (error) {
     console.error('Error uploading 3D model:', error);
-    
+
     // Cleanup on error
     if (req.file) {
       try {
@@ -231,8 +231,8 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
 
 };
 
-exports.webConfiguratordownloadModel =  async (req, res) => {
-   
+exports.webConfiguratordownloadModel = async (req, res) => {
+
   try {
     const { id } = req.params;
     const model = await WebConfigurator.findById(id);

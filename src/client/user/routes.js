@@ -82,6 +82,4 @@ router.delete(
   model3d_controller.deleteModel
 );
 
-
-
 module.exports = router;
