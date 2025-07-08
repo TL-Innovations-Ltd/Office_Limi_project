@@ -18,13 +18,20 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['model/vnd.usdz+zip', 'application/zip', 'application/octet-stream'];
+    const allowedTypes = [
+      'model/vnd.usdz+zip', 
+      'application/zip', 
+      'application/octet-stream',
+      'model/gltf-binary',
+      'model/gltf+json',
+      'application/octet-stream'
+    ];
     const fileExt = file.originalname.split('.').pop().toLowerCase();
     
-    if (allowedTypes.includes(file.mimetype) || fileExt === 'usdz') {
+    if (allowedTypes.includes(file.mimetype) || ['usdz', 'glb', 'gltf'].includes(fileExt)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only USDZ files are allowed.'), false);
+      cb(new Error('Invalid file type. Only USDZ, GLB, or GLTF files are allowed.'), false);
     }
   }
 });
