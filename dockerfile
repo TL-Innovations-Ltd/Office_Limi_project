@@ -1,24 +1,21 @@
-# Use the latest Node.js (current stable) with Alpine for a lightweight image
 FROM node:current-alpine
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /src
 
-# Copy package.json and package-lock.json for caching
+
+
+# Copy package files
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm install --production
+# Install dependencies
+RUN npm install --production=false
 
-# Copy the rest of your app
+# Copy application code
 COPY . .
 
-# Set environment to production
-ENV NODE_ENV=production
-
-# Expose the port (same as your Node.js app)
+# Expose the application port
 EXPOSE 3000
 
-# Use PM2 to run your app in cluster mode with all available CPUs
-# CMD ["pm2-runtime", "start", "index.js", "-i", "max"]
-CMD ["npm", "start"]
+# Command to run the application
+CMD ["npm", "run", "dev"]
