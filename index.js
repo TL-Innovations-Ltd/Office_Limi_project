@@ -14,12 +14,50 @@ const test_ping = require('./src/test/routes');
 const admin_device_routes = require('./src/admin/devices/routes');
 const device_routes = require('./src/client/devices/routes');
 
-app.use(
-    cors({
-        origin: "*"
-    })
-);
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow specific domains
+        if (!origin || 
+            origin === "https://playcanv.as" || 
+            origin === "https://dev.api.limitless-lighting.co.uk" || 
+            origin === "http://localhost:3000" || 
+            origin === "http://localhost:5173") {
+            callback(null, true);
+        } else {
+            callback(null, false);
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Content-Length', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+    credentials: true,
+    maxAge: 3600,
+    optionsSuccessStatus: 204
+};
 
+// Add CORS middleware first
+app.use(cors(corsOptions));
+
+// Add additional headers
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Vary', 'Origin');
+    next();
+});
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
+// Add timeout for large file uploads
+app.use((req, res, next) => {
+    res.setTimeout(300000); // 5 minutes
+    next();
+});
+
+// Add this before your routes
 app.use(express.json({ limit: '2000mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2000mb' }));
 
