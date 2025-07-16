@@ -119,7 +119,7 @@ module.exports = {
 
         // **Generate Deep Link for Swift App**
         const mailOptions = {
-            from: process.env.BREVO_SECRET_EMAIL,
+            from: '"Limi Lighting" <' + process.env.GMAIL_SECRET_EMAIL + '>',
             to: email,
             subject: "Limi App OTP",
             html: `

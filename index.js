@@ -19,6 +19,7 @@ const allowedWebOrigins = [
     'https://www.limilighting.com',
 
     // Development/Staging
+    'http://localhost:3000',
     'https://limi-tau.vercel.app',
     
     // PlayCanvas - both HTTP and HTTPS
