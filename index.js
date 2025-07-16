@@ -14,48 +14,58 @@ const test_ping = require('./src/test/routes');
 const admin_device_routes = require('./src/admin/devices/routes');
 const device_routes = require('./src/client/devices/routes');
 
+const allowedWebOrigins = [
+    // Production domains
+    'https://www.limilighting.com',
+
+    // Development/Staging
+    'https://limi-tau.vercel.app',
+    
+    // PlayCanvas - both HTTP and HTTPS
+    'https://playcanv.as',
+    'http://playcanv.as',
+];
+
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow specific domains
-        if (!origin || 
-            origin === "https://playcanv.as" || 
-            origin === "https://dev.api.limitless-lighting.co.uk" || 
-            origin === "http://localhost:3000" || 
-            origin === "http://localhost:5173") {
-            callback(null, true);
-        } else {
-            callback(null, false);
-        }
+      // Allow all mobile apps (no origin) and requests from allowed web origins
+      if (!origin) {
+        return callback(null, true);
+    }
+    
+    // For web origins, check against the allowed list
+    if (allowedWebOrigins.includes(origin)) {
+        return callback(null, true);
+    }
+    
+    // Log and block other web origins
+    console.warn(`CORS policy: Suzair ${origin} not allowed`);
+    return callback(new Error('Not allowed by CORS'), false);
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Content-Length', 'X-Requested-With', 'Accept'],
-    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
-    credentials: true,
-    maxAge: 3600,
-    optionsSuccessStatus: 204
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'X-File-Name',
+        'Cache-Control',
+        'X-API-Key'  // If you use API keys
+    ],
+    exposedHeaders: [
+        'Content-Disposition',
+        'X-File-Name',
+        'X-RateLimit-Limit',
+        'X-RateLimit-Remaining'
+    ],
+    credentials: true,  // Important if using cookies/sessions
+    maxAge: 86400,     // 24 hours
+    preflightContinue: false,
+    optionsSuccessStatus: 200
 };
 
-// Add CORS middleware first
+// In your Express setup
 app.use(cors(corsOptions));
-
-// Add additional headers
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Accept');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Vary', 'Origin');
-    next();
-});
-
-// Handle preflight requests explicitly
-app.options('*', cors(corsOptions));
-
-// Add timeout for large file uploads
-app.use((req, res, next) => {
-    res.setTimeout(300000); // 5 minutes
-    next();
-});
 
 // Add this before your routes
 app.use(express.json({ limit: '2000mb' }));
