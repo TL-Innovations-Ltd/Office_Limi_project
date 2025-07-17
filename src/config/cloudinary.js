@@ -12,8 +12,21 @@ cloudinary.config({
   secure: true
 });
 
-// Configure multer for memory storage for 3D models
-const storage_model3d = multer.memoryStorage();
+// Configure multer for disk storage for 3D models
+const model3dDir = path.join(__dirname, '../../3d-models');
+if (!fs.existsSync(model3dDir)) {
+  fs.mkdirSync(model3dDir, { recursive: true });
+}
+
+const storage_model3d = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, model3dDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = uuidv4() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
+});
 
 // For 3D model uploads
 const upload = multer({

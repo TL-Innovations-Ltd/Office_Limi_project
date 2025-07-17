@@ -180,55 +180,39 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
   }
 
   try {
-    const ext = path.extname(req.file.originalname);
-    const uniqueFilename = `${uuidv4()}${ext}`;
-    const model3dDir = path.join(__dirname, '../../../3d-models');
-    if (!fs.existsSync(model3dDir)) {
-      fs.mkdirSync(model3dDir, { recursive: true });
-    }
-    const outputPath = path.join(model3dDir, uniqueFilename);
+    // The file is already saved to disk by multer.diskStorage
+    // Use req.file.path and req.file.filename directly
+    const modelData = {
+      filename: req.file.originalname,
+      path: req.file.path,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    };
 
-    const writeStream = fs.createWriteStream(outputPath);
-    writeStream.write(req.file.buffer);
-    writeStream.end();
+    const savedModel = await WebConfigurator.create(modelData);
 
-    writeStream.on('finish', async () => {
-      try {
-        const modelData = {
-          filename: req.file.originalname,
-          path: outputPath,
-          size: req.file.size,
-          mimetype: req.file.mimetype
-        };
-        const savedModel = await WebConfigurator.create(modelData);
-        const responseModel = savedModel.toObject();
-        responseModel.download_Id = savedModel._id;
-        return res.status(201).json({
-          success: true,
-          data: responseModel
-        });
-      } catch (error) {
-        console.error('Error uploading 3D model:', error);
-        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to process 3D model',
-          error: error.message
-        });
-      }
+    // Return relative path for client
+    const responseModel = savedModel.toObject();
+    responseModel.download_Id = savedModel._id;
+
+    return res.status(201).json({
+      success: true,
+      data: responseModel
     });
-
-    writeStream.on('error', (err) => {
-      console.error('Stream error:', err);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to save file',
-        error: err.message
-      });
-    });
-
   } catch (error) {
     console.error('Error uploading 3D model:', error);
+
+    // Cleanup on error
+    if (req.file && req.file.path) {
+      try {
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+      } catch (cleanupError) {
+        console.error('Error cleaning up file:', cleanupError);
+      }
+    }
+
     return res.status(500).json({
       success: false,
       message: 'Failed to process 3D model',
