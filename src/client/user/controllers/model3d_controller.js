@@ -172,7 +172,6 @@ exports.deleteModel = async (req, res) => {
 
 
 exports.webConfiguratoruplodaModel = async (req, res) => {
-
   if (!req.file) {
     return res.status(400).json({
       success: false,
@@ -181,17 +180,11 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
   }
 
   try {
-    const fileExtension = path.extname(req.file.originalname);
-    const uniqueFilename = `${uuidv4()}${fileExtension}`;
-    const filePath = path.join(uploadDir, uniqueFilename);
-
-    // Move the file to the upload directory
-    await fs.promises.writeFile(filePath, req.file.buffer);
-
-    // Create model data
+    // The file is already saved to disk by multer.diskStorage
+    // Use req.file.path and req.file.filename directly
     const modelData = {
       filename: req.file.originalname,
-      path: filePath,
+      path: req.file.path,
       size: req.file.size,
       mimetype: req.file.mimetype
     };
@@ -206,16 +199,14 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
       success: true,
       data: responseModel
     });
-
   } catch (error) {
     console.error('Error uploading 3D model:', error);
 
     // Cleanup on error
-    if (req.file) {
+    if (req.file && req.file.path) {
       try {
-        const filePath = path.join(uploadDir, req.file.filename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
         }
       } catch (cleanupError) {
         console.error('Error cleaning up file:', cleanupError);
@@ -228,7 +219,6 @@ exports.webConfiguratoruplodaModel = async (req, res) => {
       error: error.message
     });
   }
-
 };
 
 exports.webConfiguratordownloadModel = async (req, res) => {

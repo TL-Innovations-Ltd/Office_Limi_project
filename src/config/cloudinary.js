@@ -1,6 +1,8 @@
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -10,12 +12,25 @@ cloudinary.config({
   secure: true
 });
 
-// Configure multer for memory storage
-const storage = multer.memoryStorage();
+// Configure multer for disk storage for 3D models
+const model3dDir = path.join(__dirname, '../../3d-models');
+if (!fs.existsSync(model3dDir)) {
+  fs.mkdirSync(model3dDir, { recursive: true });
+}
+
+const storage_model3d = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, model3dDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = uuidv4() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
+});
 
 // For 3D model uploads
 const upload = multer({
-  storage: storage,
+  storage: storage_model3d,
   limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
@@ -36,6 +51,8 @@ const upload = multer({
   }
 });
 
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
 // For profile picture uploads
 const profilePictureUpload = multer({
   storage: storage,
