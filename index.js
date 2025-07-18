@@ -20,6 +20,7 @@ const allowedWebOrigins = [
 
     // Development/Staging
     'http://localhost:3000',
+    'http://192.168.100.136:3000',
     'https://limi-tau.vercel.app',
     
     // PlayCanvas - both HTTP and HTTPS
