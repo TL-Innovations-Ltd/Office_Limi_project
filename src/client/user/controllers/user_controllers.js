@@ -10,6 +10,36 @@ const clearUserCache = async (userId) => {
 };
 
 module.exports = {
+    
+    // Forgot password: Step 1 - Send OTP
+    forgot_password_send_otp: async (req, res) => {
+        try {
+            const result = await user_service.forgot_password_send_otp_service(req);
+            res.status(200).json({ success: true, message: result});
+        } catch (e) {
+            res.status(500).json({ success: false, error_message: e.message });
+        }
+    },
+
+    // Forgot password: Step 2 - Verify OTP
+    forgot_password_verify_otp: async (req, res) => {
+        try {
+            const result = await user_service.forgot_password_verify_otp_service(req);
+            res.status(200).json({ success: true, message: result });
+        } catch (e) {
+            res.status(400).json({ success: false, error_message: e.message });
+        }
+    },
+
+    // Forgot password: Step 3 - Reset password
+    forgot_password_reset: async (req, res) => {
+        try {
+            const result = await user_service.forgot_password_reset_service(req);
+            res.status(200).json({ success: true, message: result });
+        } catch (e) {
+            res.status(400).json({ success: false, error_message: e.message });
+        }
+    },
      
     send_otp :  async(req, res) => {
           try{

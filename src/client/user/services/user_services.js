@@ -79,6 +79,89 @@ const getUserById = async (userId) => {
 };
 
 module.exports = {
+    
+    // Forgot password: Step 1 - Send OTP
+    forgot_password_send_otp_service: async (req) => {
+        const { email } = req.body;
+        if (!email || !isValidEmail(email)) {
+            throw new Error('Valid email is required');
+        }
+        const user = await UserDB.findOne({ email });
+        if (!user) {
+            throw new Error('User with this email does not exist');
+        }
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp_expire_at = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        // Save OTP and expiry
+        user.otp = otp;
+        user.otp_expire_at = otp_expire_at;
+        await user.save();
+        // Send OTP email
+        const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 32px 24px; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); background: #fff;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <img src='https://limilighting.com/assets/logo.png' alt='Limi Lighting' style='height: 48px; margin-bottom: 12px;'>
+                <h2 style="color: #1a237e; margin: 0 0 8px 0;">Limi Lighting</h2>
+            </div>
+            <h3 style="color: #333; text-align:center; margin: 0 0 16px 0;">Password Reset OTP</h3>
+            <p style="font-size: 16px; color: #444; text-align:center; margin-bottom: 20px;">We received a request to reset your password. Use the OTP below to proceed:</p>
+            <div style="text-align: center; margin: 32px 0;">
+                <span style="display: inline-block; font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1976d2; background: #f5faff; padding: 16px 32px; border-radius: 8px; border: 1px solid #1976d2;">${otp}</span>
+            </div>
+            <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 8px;">This OTP is valid for 10 minutes.</p>
+            <p style="text-align: center; color: #999; font-size: 13px;">If you did not request a password reset, please ignore this email.<br>For security, do not share this OTP with anyone.</p>
+            <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;">
+            <div style="text-align: center;">
+                <a href="https://limilighting.com" style="color: #1976d2; text-decoration: none; font-size: 14px;">Visit Limi Lighting</a>
+            </div>
+        </div>`;
+        await transporter.sendMail({
+            from: '"Limi Lighting" <' + process.env.GMAIL_SECRET_EMAIL + '>',
+            to: user.email,
+            subject: 'Password Reset OTP',
+            html : html
+        });
+        return `OTP sent to ${user.email}`;
+    },  
+
+    // Forgot password: Step 2 - Verify OTP
+    forgot_password_verify_otp_service: async (req) => {
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            throw new Error('Email and OTP are required');
+        }
+        const user = await UserDB.findOne({ email });
+        if (!user || !user.otp || !user.otp_expire_at) {
+            throw new Error('OTP not requested or expired');
+        }
+        if (user.otp !== otp) {
+            throw new Error('Invalid OTP');
+        }
+        if (user.otp_expire_at < new Date()) {
+            throw new Error('OTP expired');
+        }
+    
+        return `OTP verified for ${user.email}`;
+    },
+    // Forgot password: Step 3 - Reset password
+    forgot_password_reset_service: async (req) => {
+        const { email, newPassword } = req.body;
+        if (!email || !newPassword) {
+            throw new Error('Email and new password are required');
+        }
+        const user = await UserDB.findOne({ email });
+        if (!user) {
+            throw new Error('User with this email does not exist');
+        }
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.otp = undefined;
+        user.otp_expire_at = undefined;
+        await user.save();
+        return `Password reset successful for ${user.email}`;
+    },
 
     send_otp_service: async (req) => {
         const { email, isWebsiteSignup = false, username, password } = req.body;

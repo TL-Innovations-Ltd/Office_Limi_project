@@ -19,7 +19,12 @@ router.post('/send_otp', user_controller.send_otp);
 router.post('/verify_otp', user_controller.check_otp);
 router.post('/verify_production', user_controller.verify_production_user);
 router.post('/installer_user', user_controller.installer_user);
-router.get('/send_user_data' , authClientmiddleware , cache(FIVE_MINUTES , 'profile') ,  user_controller.send_user_controller)
+router.get('/send_user_data' , authClientmiddleware , cache(FIVE_MINUTES , 'profile') ,  user_controller.send_user_controller);
+
+// Forgot password flow
+router.post('/forgot_password/send_otp', user_controller.forgot_password_send_otp);
+router.post('/forgot_password/verify_otp', user_controller.forgot_password_verify_otp);
+router.post('/forgot_password/reset', user_controller.forgot_password_reset);
 
 // User management routes
 router.patch('/update_profile', 
