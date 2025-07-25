@@ -3,13 +3,13 @@ const mongoose = require("mongoose");
 // ----- Address Schema -----
 const addressSchema = new mongoose.Schema(
   {
-    fullName: { type: String, required: true },
-    phone: { type: String, required: true },
-    street: { type: String, required: true },
-    city: { type: String, required: true },
+    fullName: { type: String },
+    phone: { type: String },
+    street: { type: String },
+    city: { type: String },
     state: { type: String },
-    postalCode: { type: String, required: true },
-    country: { type: String, required: true },
+    postalCode: { type: String },
+    country: { type: String },
   },
   { _id: false }
 );
@@ -17,11 +17,11 @@ const addressSchema = new mongoose.Schema(
 // ----- Payment Method Schema -----
 const paymentMethodSchema = new mongoose.Schema(
   {
-    cardType: { type: String, required: true },
-    cardHolder: { type: String, required: true },
-    cardNumber: { type: String, required: true },
-    expiryDate: { type: String, required: true },
-    cvv: { type: String, required: true },
+    cardType: { type: String },
+    cardHolder: { type: String },
+    cardNumber: { type: String },
+    expiryDate: { type: String },
+    cvv: { type: String },
   },
   { _id: false }
 );

@@ -17,7 +17,7 @@ module.exports = {
             const result = await user_service.forgot_password_send_otp_service(req);
             res.status(200).json({ success: true, message: result});
         } catch (e) {
-            res.status(500).json({ success: false, error_message: e.message });
+            res.status(500).json({ success: false, error_message: JSON.stringify(e)});
         }
     },
 
@@ -27,7 +27,7 @@ module.exports = {
             const result = await user_service.forgot_password_verify_otp_service(req);
             res.status(200).json({ success: true, message: result });
         } catch (e) {
-            res.status(400).json({ success: false, error_message: e.message });
+            res.status(400).json({ success: false, error_message: JSON.stringify(e) });
         }
     },
 
@@ -37,7 +37,7 @@ module.exports = {
             const result = await user_service.forgot_password_reset_service(req);
             res.status(200).json({ success: true, message: result });
         } catch (e) {
-            res.status(400).json({ success: false, error_message: e.message });
+            res.status(400).json({ success: false, error_message: JSON.stringify(e) });
         }
     },
      
