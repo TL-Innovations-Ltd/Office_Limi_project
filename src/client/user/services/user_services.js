@@ -82,11 +82,11 @@ module.exports = {
     
     // Forgot password: Step 1 - Send OTP
     forgot_password_send_otp_service: async (req) => {
-         console.log(req.body);
+
         const { email } = req.body;
-        // if (!email || !isValidEmail(email)) {
-        //     throw new Error('Valid email is required');
-        // }
+        if (!email || !isValidEmail(email)) {
+            throw new Error('Valid email is required');
+        }
 
         const user = await UserDB.findOne({ email });
         if (!user) {
