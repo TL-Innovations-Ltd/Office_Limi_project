@@ -79,7 +79,7 @@ const getUserById = async (userId) => {
 };
 
 module.exports = {
-    
+
     // Forgot password: Step 1 - Send OTP
     forgot_password_send_otp_service: async (req) => {
 
@@ -122,10 +122,10 @@ module.exports = {
             from: '"Limi Lighting" <' + process.env.GMAIL_SECRET_EMAIL + '>',
             to: user.email,
             subject: 'Password Reset OTP',
-            html : html
+            html: html
         });
         return `OTP sent to ${user.email}`;
-    },  
+    },
 
     // Forgot password: Step 2 - Verify OTP
     forgot_password_verify_otp_service: async (req) => {
@@ -143,7 +143,7 @@ module.exports = {
         if (user.otp_expire_at < new Date()) {
             throw new Error('OTP expired');
         }
-    
+
         return `OTP verified for ${user.email}`;
     },
     // Forgot password: Step 3 - Reset password
@@ -476,7 +476,7 @@ module.exports = {
                 { new: true, runValidators: true }
             );
 
-            clearCache( 'profile' , userId);
+            clearCache('profile', userId);
 
             return 'Profile updated successfully';
         } catch (error) {
