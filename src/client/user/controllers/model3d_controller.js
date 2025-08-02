@@ -172,6 +172,7 @@ exports.deleteModel = async (req, res) => {
 
 
 exports.webConfiguratoruplodaModel = async (req, res) => {
+
   if (!req.file) {
     return res.status(400).json({
       success: false,
@@ -254,6 +255,7 @@ exports.webConfiguratordownloadModel = async (req, res) => {
         }
       }
     });
+    
   } catch (error) {
     console.error('Error in downloadModel:', error);
     res.status(500).json({

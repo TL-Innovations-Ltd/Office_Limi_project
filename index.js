@@ -4,6 +4,7 @@ require('dotenv').config({ path: envPath });
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const connectDB = require('./src/connection/DB_connection');
 const { specs, swaggerUi } = require('./src/config/swagger');
 
@@ -72,6 +73,8 @@ app.use(cors(corsOptions));
 // Add this before your routes
 app.use(express.json({ limit: '2000mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2000mb' }));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 connectDB();
 

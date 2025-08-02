@@ -4,7 +4,7 @@ const user_controller = require('./controllers/user_controllers');
 const model3d_controller = require('./controllers/model3d_controller');
 const authClientmiddleware = require('../middleware/user_middleware');
 const { cache } = require('../../utils/redisCache');
-const { upload, uploadToCloudinary, profilePictureUpload, uploadProfilePicture } = require('../../config/cloudinary');
+const { upload, uploadToCloudinary, profilePictureUpload, uploadProfilePicture , profilePictureDiskUpload } = require('../../config/cloudinary');
 
 // Cache duration in seconds
 const FIVE_MINUTES = 5 * 60; // 5 minutes cache
@@ -29,7 +29,7 @@ router.post('/forgot_password/reset', user_controller.forgot_password_reset);
 // User management routes
 router.patch('/update_profile', 
     authClientmiddleware, 
-    profilePictureUpload.single('profilePicture'), 
+    profilePictureDiskUpload.single('profilePicture'), 
     user_controller.update_profile
 );
 

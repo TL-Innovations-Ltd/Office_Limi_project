@@ -51,16 +51,28 @@ const upload = multer({
   }
 });
 
-// Configure multer for memory storage
-const storage = multer.memoryStorage();
-// For profile picture uploads
-const profilePictureUpload = multer({
-  storage: storage,
+// Configure multer for disk storage for profile pictures
+const profilePictureDir = path.join(__dirname, '../../uploads/profile_picture');
+if (!fs.existsSync(profilePictureDir)) {
+  fs.mkdirSync(profilePictureDir, { recursive: true });
+}
+
+const storage_profilePicture = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, profilePictureDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = uuidv4() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
+});
+
+const profilePictureDiskUpload = multer({
+  storage: storage_profilePicture,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
     const fileExt = file.originalname.split('.').pop().toLowerCase();
-    
     if (allowedTypes.includes(file.mimetype) && ['jpeg', 'jpg', 'png', 'gif'].includes(fileExt)) {
       cb(null, true);
     } else {
@@ -94,13 +106,13 @@ const uploadToCloudinary = (buffer, originalname) => {
 // Function to upload profile picture to Cloudinary
 const uploadProfilePicture = (buffer) => {
   return new Promise((resolve, reject) => {
-    const public_id = `profile-pictures/${uuidv4()}`;
+    const public_id = `vpos/profile_picture/${uuidv4()}`;
     
     cloudinary.uploader.upload_stream(
       {
         resource_type: 'image',
         public_id: public_id,
-        folder: 'profile-pictures',
+        folder: 'vpos/profile_picture',
         transformation: [
           { width: 200, height: 200, gravity: 'face', crop: 'thumb' },
           { quality: 'auto:good' }
@@ -130,7 +142,7 @@ module.exports = {
     cloudinary,
     upload,
     uploadToCloudinary, 
-    profilePictureUpload,
+    profilePictureDiskUpload,
     uploadProfilePicture,
     deleteFromCloudinary
 };

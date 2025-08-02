@@ -124,51 +124,50 @@ module.exports = {
             const file = req.file;
 
             let updateData = {};
-            let oldPublicId = null;
-            
+            let oldFileName = null;
+
             // Get the current user to check for existing profile picture
             const currentUser = await user_service.getUserById(userId);
-            
-            // If user has an existing profile picture, store the public_id for deletion
+
+            // If user has an existing profile picture, store the filename for deletion
             if (currentUser.profilePicture?.public_id) {
-                oldPublicId = currentUser.profilePicture.public_id;
+                
+                oldFileName = currentUser.profilePicture.public_id;
             }
-            
+
             // Handle profile picture upload if file exists
             if (file) {
-                try {
+                const fs = require('fs');
+                const path = require('path');
+                const uploadsDir = path.join(__dirname, '../../../../uploads/profile_picture');
 
-                     // Delete old profile picture if it exists
-                     if (oldPublicId) {
-                        try {
-                            await deleteFromCloudinary(oldPublicId);
-                        } catch (deleteError) {
-                            console.error('Error deleting old profile picture:', deleteError);
-                            // Continue even if deletion fails
+                // Delete old profile picture if it exists
+                if (oldFileName) {
+                    const oldFilePath = path.join(uploadsDir, oldFileName);
+                    try {
+                        if (fs.existsSync(oldFilePath)) {
+                            fs.unlinkSync(oldFilePath);
                         }
+                    } catch (deleteError) {
+                        console.error('Error deleting old profile picture:', deleteError);
                     }
-
-                    // Upload new profile picture
-                    const result = await uploadProfilePicture(file.buffer);
-                    updateData.profilePicture = {
-                        url: result.secure_url,
-                        public_id: result.public_id
-                    };
-                    
-                } catch (uploadError) {
-                    console.error('Error uploading to Cloudinary:', uploadError);
-                    return res.status(500).json({
-                        success: false,
-                        error_message: 'Failed to upload profile picture'
-                    });
                 }
+
+                // Save new profile picture URL and filename
+                // Assuming your backend is served at https://your-backend-domain
+                // Replace with your actual backend URL or use req.get('host') for dynamic
+                const backendBaseUrl = req.protocol + '://' + req.get('host');
+                updateData.profilePicture = {
+                    url : backendBaseUrl + '/uploads/profile_picture/' + file.filename,
+                    public_id : file.filename
+                };
             }
-            
+
             // Add username to update if provided
             if (username) {
                 updateData.username = username;
             }
-            
+
             // If there's nothing to update, return error
             if (Object.keys(updateData).length === 0) {
                 return res.status(400).json({ 
@@ -176,10 +175,10 @@ module.exports = {
                     error_message: 'No data provided for update' 
                 });
             }
-            
+
             // Update the user
             const updatedUser = await user_service.updateUserService(userId, updateData);
-            
+
             res.status(200).json({ 
                 success: true, 
                 message: updatedUser,
