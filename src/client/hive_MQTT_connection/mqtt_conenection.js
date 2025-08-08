@@ -11,6 +11,7 @@ const client = mqtt.connect(`${host}:${port}`, {
   username,
   password,
   clientId: 'suzair' + Math.random().toString(16).substr(2, 8),
+  // rejectUnauthorized: false,
 });
 
 module.exports = client;

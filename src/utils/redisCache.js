@@ -7,7 +7,7 @@ const cache = (duration , category = 'default')  => {
             const userId = req.user?.id || 'guest';
             const path = (req.originalUrl || req.url).split('?')[0]; // Remove query params
             const key = `cache:${category}:${userId}:${path}`;
-            
+
             // Try to get cached data
             const cachedData = await redisClient.get(key);
             
